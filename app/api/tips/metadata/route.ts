@@ -7,7 +7,7 @@ import { triageWithAgent } from '@/lib/agent-client';
 import { triageFallback } from '@/lib/triage';
 import { getScore, incrementTips } from '@/lib/credibility';
 
-const RATE_LIMIT = 3;
+const RATE_LIMIT = 30;
 const WINDOW_DAYS = 30;
 
 function isValidMetadata(m: unknown): m is ITipMetadata {

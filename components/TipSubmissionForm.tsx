@@ -370,176 +370,230 @@ export default function TipSubmissionForm() {
               .
             </p>
 
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
-              placeholder="Describe what you witnessed. Dates, names, and locations help journalists verify."
-              rows={10}
-              style={{
-                width: '100%',
-                backgroundColor: 'var(--surface)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                fontFamily: "'IBM Plex Sans', sans-serif",
-                fontSize: '0.95rem',
-                padding: '1rem',
-                lineHeight: 1.7,
-                resize: 'vertical',
-                outline: 'none',
-              }}
-            />
-
             <div
               style={{
                 display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '0.75rem',
+                gap: '1rem',
+                alignItems: 'stretch',
+                flexWrap: 'wrap',
               }}
             >
-              <span
-                style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: '0.75rem',
-                  color: content.length > 4500 ? 'var(--warning)' : 'var(--text-secondary)',
-                }}
-              >
-                {content.length} / {MAX_CHARS}
-              </span>
-              <button
-                onClick={() => setStep('verifying')}
-                disabled={content.trim().length < 10}
-                style={{
-                  backgroundColor: 'var(--accent)',
-                  color: '#0a0a0a',
-                  border: 'none',
-                  padding: '0.75rem 2rem',
-                  fontFamily: "'IBM Plex Sans', sans-serif",
-                  fontWeight: 600,
-                  fontSize: '0.95rem',
-                  cursor: content.trim().length < 10 ? 'not-allowed' : 'pointer',
-                  opacity: content.trim().length < 10 ? 0.5 : 1,
-                }}
-              >
-                Continue
-              </button>
-            </div>
-
-            <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
               <div
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: '0.78rem',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  color: 'var(--text-secondary)',
-                  marginBottom: '0.75rem',
+                  flex: '0 1 240px',
+                  minWidth: '220px',
+                  border: '1px solid var(--border)',
+                  backgroundColor: 'var(--surface)',
+                  padding: '0.85rem',
                 }}
               >
-                Attachments (optional)
-              </div>
-              <p
-                style={{
-                  color: 'var(--text-secondary)',
-                  fontSize: '0.78rem',
-                  lineHeight: 1.6,
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  marginTop: 0,
-                  marginBottom: '0.75rem',
-                }}
-              >
-                Up to {MAX_FILES} files, 10MB each. Files are encrypted in this browser; the server
-                stores opaque blobs only. Filenames are encrypted too.
-              </p>
-              <input
-                type="file"
-                multiple
-                onChange={(e) => {
-                  setFileError('');
-                  const picked = Array.from(e.target.files ?? []);
-                  const next = [...files];
-                  for (const f of picked) {
-                    if (next.length >= MAX_FILES) {
-                      setFileError(`Limit ${MAX_FILES} files. Extra files ignored.`);
-                      break;
-                    }
-                    if (f.size > MAX_FILE_BYTES) {
-                      setFileError(`${f.name} exceeds 10MB and was skipped.`);
-                      continue;
-                    }
-                    if (!next.some((x) => x.name === f.name && x.size === f.size)) {
-                      next.push(f);
-                    }
-                  }
-                  setFiles(next);
-                  e.target.value = '';
-                }}
-                style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: '0.8rem',
-                  color: 'var(--text-secondary)',
-                  marginBottom: files.length > 0 ? '0.75rem' : 0,
-                }}
-              />
-              {files.length > 0 && (
-                <ul
+                <div
                   style={{
-                    listStyle: 'none',
-                    padding: 0,
-                    margin: '0.75rem 0 0',
-                    display: 'grid',
-                    gap: '0.4rem',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '0.5rem',
                   }}
                 >
-                  {files.map((f, i) => (
-                    <li
-                      key={`${f.name}-${i}`}
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        backgroundColor: 'var(--surface)',
-                        border: '1px solid var(--border)',
-                        padding: '0.5rem 0.75rem',
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: '0.78rem',
-                        color: 'var(--text-secondary)',
-                      }}
-                    >
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {f.name} <span style={{ opacity: 0.6 }}>· {Math.ceil(f.size / 1024)} KB</span>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setFiles(files.filter((_, j) => j !== i))}
-                        style={{
-                          background: 'transparent',
-                          border: '1px solid var(--border)',
-                          color: 'var(--text-secondary)',
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          fontSize: '0.7rem',
-                          padding: '0.2rem 0.5rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        REMOVE
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {fileError && (
+                  Attachments (optional)
+                </div>
                 <p
                   style={{
-                    color: 'var(--warning)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.72rem',
+                    lineHeight: 1.5,
                     fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: '0.75rem',
-                    marginTop: '0.5rem',
+                    marginTop: 0,
+                    marginBottom: '0.6rem',
                   }}
                 >
-                  {fileError}
+                  Up to {MAX_FILES} files, 10MB each. Files and filenames are encrypted in this
+                  browser.
                 </p>
-              )}
+                <label
+                  htmlFor="tip-attachments-input"
+                  style={{
+                    display: 'inline-block',
+                    width: '100%',
+                    textAlign: 'center',
+                    backgroundColor: 'var(--accent)',
+                    color: '#0a0a0a',
+                    border: '1px solid var(--accent)',
+                    padding: '0.5rem 0.6rem',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    marginBottom: files.length > 0 ? '0.45rem' : '0.35rem',
+                  }}
+                >
+                  Choose files
+                </label>
+                <input
+                  id="tip-attachments-input"
+                  type="file"
+                  multiple
+                  onChange={(e) => {
+                    setFileError('');
+                    const picked = Array.from(e.target.files ?? []);
+                    const next = [...files];
+                    for (const f of picked) {
+                      if (next.length >= MAX_FILES) {
+                        setFileError(`Limit ${MAX_FILES} files. Extra files ignored.`);
+                        break;
+                      }
+                      if (f.size > MAX_FILE_BYTES) {
+                        setFileError(`${f.name} exceeds 10MB and was skipped.`);
+                        continue;
+                      }
+                      if (!next.some((x) => x.name === f.name && x.size === f.size)) {
+                        next.push(f);
+                      }
+                    }
+                    setFiles(next);
+                    e.target.value = '';
+                  }}
+                  style={{ display: 'none' }}
+                />
+                {files.length === 0 && (
+                  <p
+                    style={{
+                      color: 'var(--text-secondary)',
+                      opacity: 0.8,
+                      fontSize: '0.68rem',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      margin: 0,
+                    }}
+                  >
+                    No files selected
+                  </p>
+                )}
+                {files.length > 0 && (
+                  <ul
+                    style={{
+                      listStyle: 'none',
+                      padding: 0,
+                      margin: '0.6rem 0 0',
+                      display: 'grid',
+                      gap: '0.35rem',
+                    }}
+                  >
+                    {files.map((f, i) => (
+                      <li
+                        key={`${f.name}-${i}`}
+                        style={{
+                          display: 'grid',
+                          gap: '0.35rem',
+                          border: '1px solid var(--border)',
+                          padding: '0.45rem 0.5rem',
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: '0.7rem',
+                          color: 'var(--text-secondary)',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {f.name}
+                        </span>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ opacity: 0.6 }}>{Math.ceil(f.size / 1024)} KB</span>
+                          <button
+                            type="button"
+                            onClick={() => setFiles(files.filter((_, j) => j !== i))}
+                            style={{
+                              background: 'transparent',
+                              border: '1px solid var(--border)',
+                              color: 'var(--text-secondary)',
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontSize: '0.65rem',
+                              padding: '0.15rem 0.4rem',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            REMOVE
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {fileError && (
+                  <p
+                    style={{
+                      color: 'var(--warning)',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.72rem',
+                      marginTop: '0.5rem',
+                    }}
+                  >
+                    {fileError}
+                  </p>
+                )}
+              </div>
+
+              <div
+                style={{
+                  flex: '1 1 360px',
+                  minWidth: '280px',
+                }}
+              >
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
+                  placeholder="Describe what you witnessed. Dates, names, and locations help journalists verify."
+                  rows={10}
+                  style={{
+                    width: '100%',
+                    backgroundColor: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    color: 'var(--text-primary)',
+                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontSize: '0.95rem',
+                    padding: '1rem',
+                    lineHeight: 1.7,
+                    resize: 'vertical',
+                    outline: 'none',
+                  }}
+                />
+
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: '0.75rem',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.75rem',
+                      color: content.length > 4500 ? 'var(--warning)' : 'var(--text-secondary)',
+                    }}
+                  >
+                    {content.length} / {MAX_CHARS}
+                  </span>
+                  <button
+                    onClick={() => setStep('verifying')}
+                    disabled={content.trim().length < 10}
+                    style={{
+                      backgroundColor: 'var(--accent)',
+                      color: '#0a0a0a',
+                      border: 'none',
+                      padding: '0.75rem 2rem',
+                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontWeight: 600,
+                      fontSize: '0.95rem',
+                      cursor: content.trim().length < 10 ? 'not-allowed' : 'pointer',
+                      opacity: content.trim().length < 10 ? 0.5 : 1,
+                    }}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
             </div>
 
             <div style={{ marginTop: '2rem', borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
