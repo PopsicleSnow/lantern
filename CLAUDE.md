@@ -164,6 +164,11 @@ PUBLIC PAGES
 **Symptom:** `next build` fails when `turbopack: {}` and a `webpack: (config) => {}` function are both present in `next.config.ts`.
 **Fix:** Never set both at once. Use webpack config only (no `turbopack: {}`), and add `--webpack` to npm scripts.
 
+### 6. Mobile — `SyntaxError: Unexpected token 'export'` on `expo run:*`
+**Symptom:** `npx expo run:ios` (or `run:android`) throws a bare `SyntaxError: Unexpected token 'export'` from Node's CJS loader (`loadESMFromCJS`) before Metro starts. No file path in the stack.
+**Root cause:** A local Expo native module (`./modules/zetic-mlange`) was listed in `app.json` `expo.plugins`. Expo CLI tries to `require()` each plugin entry through Node directly (not Metro). Our module's `package.json` `main` points at `src/index.ts`, so Node tries to evaluate the TypeScript ESM file as CJS and chokes on the first `export`.
+**Fix:** Native modules are auto-discovered by `expo prebuild` via `expo-module.config.json` — they should NOT be in the `plugins` array. The `plugins` array is only for *config plugins* (CJS functions that mutate the native projects). Removed `"./modules/zetic-mlange"` from `mobile/app.json`. If we ever need a real config plugin for the module (e.g. to auto-add the SPM package on iOS), it must live in a separate file (`app.plugin.js` at the module root) exported as a CJS function.
+
 ---
 
 ## Phase 1 Directory Structure

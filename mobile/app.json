@@ -18,8 +18,7 @@
       }
     },
     "plugins": [
-      "expo-router",
-      "./modules/zetic-mlange"
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true

@@ -1,0 +1,8 @@
+{
+  "android": {
+    "package": "com.anonymous.lantern"
+  },
+  "ios": {
+    "bundleIdentifier": "com.anonymous.lantern"
+  }
+}
