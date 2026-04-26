@@ -1,0 +1,504 @@
+'use client';
+
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
+import type { WorldIDProof } from './WorldIDButton';
+import EdgeAIProgress from './EdgeAIProgress';
+import { classify } from '@/lib/edge-ai/classify';
+import { computeMetadata } from '@/lib/edge-ai/quality';
+import { encryptToRecipient } from '@/lib/crypto/keypair';
+import type { ITipMetadata } from '@/lib/models/Tip';
+
+const WorldIDButton = dynamic(() => import('./WorldIDButton'), { ssr: false });
+
+type Step =
+  | 'writing'
+  | 'verifying'
+  | 'analyzing'
+  | 'encrypting'
+  | 'submitting'
+  | 'confirmed'
+  | 'error';
+
+const MAX_CHARS = 5000;
+
+type Recipient = { journalist_id: string; public_key: string };
+
+type ProgressEvent = { status: string; name?: string; progress?: number };
+
+export default function TipSubmissionForm() {
+  const [step, setStep] = useState<Step>('writing');
+  const [content, setContent] = useState('');
+  const [tipId, setTipId] = useState('');
+  const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const [progressStage, setProgressStage] = useState('Analyzing on-device');
+  const [progressDetail, setProgressDetail] = useState('');
+  const [progressValue, setProgressValue] = useState<number | undefined>(undefined);
+
+  const onModelProgress = (e: ProgressEvent) => {
+    if (e.status === 'progress' && typeof e.progress === 'number') {
+      setProgressDetail(
+        e.name ? `Loading model: ${e.name} (${Math.round(e.progress)}%)` : `Loading model (${Math.round(e.progress)}%)`
+      );
+      setProgressValue(e.progress / 100);
+    } else if (e.status === 'ready') {
+      setProgressDetail('Model ready');
+      setProgressValue(1);
+    } else if (e.status === 'download') {
+      setProgressDetail(`Downloading model${e.name ? ': ' + e.name : ''}`);
+    }
+  };
+
+  const runEdgeAI = async (text: string): Promise<ITipMetadata> => {
+    setProgressStage('Classifying on-device');
+    setProgressDetail('Loading classifier...');
+    setProgressValue(undefined);
+
+    const classification = await classify(text, onModelProgress);
+
+    setProgressStage('Computing quality signals');
+    setProgressDetail('Loading embedder...');
+    setProgressValue(undefined);
+
+    const metadata = await computeMetadata(text, classification, onModelProgress);
+    return metadata;
+  };
+
+  const submit = async (verifiedProof: WorldIDProof | null) => {
+    try {
+      setStep('analyzing');
+      const metadata = await runEdgeAI(content);
+
+      const metadataBody: Record<string, unknown> = { metadata };
+      if (verifiedProof) metadataBody.idkit_response = verifiedProof.idkit_response;
+
+      const metaRes = await fetch('/api/tips/metadata', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(metadataBody),
+      });
+
+      if (metaRes.status === 429) {
+        setError('You have reached the submission limit for this period.');
+        setStep('error');
+        return;
+      }
+      if (!metaRes.ok) {
+        const data = await metaRes.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Submission failed at metadata step');
+      }
+
+      const meta = (await metaRes.json()) as {
+        tip_id: string;
+        recipients: Recipient[];
+      };
+
+      if (!meta.recipients || meta.recipients.length === 0) {
+        setError(
+          'No journalists are available to receive this tip yet. Please try again once journalists have published their public keys.'
+        );
+        setStep('error');
+        return;
+      }
+
+      setStep('encrypting');
+      setProgressStage('Encrypting to recipients');
+      setProgressDetail(`Encrypting to ${meta.recipients.length} journalist(s)`);
+      setProgressValue(undefined);
+
+      const ciphertexts = meta.recipients.map((r) => ({
+        journalist_id: r.journalist_id,
+        ...encryptToRecipient(content, r.public_key),
+      }));
+
+      setStep('submitting');
+
+      const ctRes = await fetch(`/api/tips/${meta.tip_id}/ciphertext`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ciphertexts }),
+      });
+      if (!ctRes.ok) {
+        const data = await ctRes.json().catch(() => ({}));
+        throw new Error(data.error ?? 'Submission failed at ciphertext step');
+      }
+
+      setTipId(meta.tip_id);
+      setStep('confirmed');
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Submission failed');
+      setStep('error');
+    }
+  };
+
+  const handleVerified = (proof: WorldIDProof) => {
+    submit(proof);
+  };
+
+  const handleVerifyError = (err: Error) => {
+    setError(err?.message ?? 'Verification failed');
+    setStep('error');
+  };
+
+  const copyTipId = async () => {
+    await navigator.clipboard.writeText(tipId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const stepIndex = {
+    writing: 0,
+    verifying: 1,
+    analyzing: 2,
+    encrypting: 2,
+    submitting: 3,
+    confirmed: 3,
+    error: 0,
+  }[step];
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: 'var(--bg)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+      }}
+    >
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '3rem', alignItems: 'center' }}>
+        {['Write', 'Verify', 'Analyze', 'Submit'].map((label, i) => (
+          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div
+              style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                border: `1px solid ${i <= stepIndex ? 'var(--accent)' : 'var(--border)'}`,
+                backgroundColor: i < stepIndex ? 'var(--accent)' : 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.7rem',
+                color:
+                  i < stepIndex ? '#0a0a0a' : i === stepIndex ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
+            >
+              {i < stepIndex ? '✓' : i + 1}
+            </div>
+            <span
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.72rem',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: i === stepIndex ? 'var(--accent)' : 'var(--text-secondary)',
+              }}
+            >
+              {label}
+            </span>
+            {i < 3 && (
+              <div
+                style={{
+                  width: '1.5rem',
+                  height: '1px',
+                  backgroundColor: i < stepIndex ? 'var(--accent-dim)' : 'var(--border)',
+                }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div style={{ width: '100%', maxWidth: '640px' }}>
+        {step === 'writing' && (
+          <div>
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.75rem',
+                color: 'var(--text-primary)',
+                marginBottom: '0.5rem',
+              }}
+            >
+              What did you witness?
+            </h1>
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.9rem',
+                marginBottom: '0.5rem',
+                lineHeight: 1.6,
+              }}
+            >
+              Be specific. Dates, names, and locations help journalists verify your tip.
+            </p>
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                marginBottom: '1.5rem',
+                lineHeight: 1.6,
+                fontFamily: "'IBM Plex Mono', monospace",
+              }}
+            >
+              Your text is classified and encrypted in this browser before anything leaves your device.
+              The server only sees ciphertext + shape metadata.{' '}
+              <Link
+                href="/transparency"
+                style={{ color: 'var(--accent)', textDecoration: 'underline' }}
+              >
+                Verify journalist keys
+              </Link>
+              .
+            </p>
+
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value.slice(0, MAX_CHARS))}
+              placeholder="Describe what you witnessed. Dates, names, and locations help journalists verify."
+              rows={10}
+              style={{
+                width: '100%',
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontSize: '0.95rem',
+                padding: '1rem',
+                lineHeight: 1.7,
+                resize: 'vertical',
+                outline: 'none',
+              }}
+            />
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '0.75rem',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.75rem',
+                  color: content.length > 4500 ? 'var(--warning)' : 'var(--text-secondary)',
+                }}
+              >
+                {content.length} / {MAX_CHARS}
+              </span>
+              <button
+                onClick={() => setStep('verifying')}
+                disabled={content.trim().length < 10}
+                style={{
+                  backgroundColor: 'var(--accent)',
+                  color: '#0a0a0a',
+                  border: 'none',
+                  padding: '0.75rem 2rem',
+                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                  cursor: content.trim().length < 10 ? 'not-allowed' : 'pointer',
+                  opacity: content.trim().length < 10 ? 0.5 : 1,
+                }}
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 'verifying' && (
+          <div style={{ textAlign: 'center' }}>
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.75rem',
+                color: 'var(--text-primary)',
+                marginBottom: '0.75rem',
+              }}
+            >
+              Prove you&apos;re human.
+            </h1>
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.9rem',
+                lineHeight: 1.6,
+                maxWidth: '400px',
+                margin: '0 auto 2.5rem',
+              }}
+            >
+              We verify you&apos;re a real person. We store only a cryptographic hash, never your identity.
+              World ID also unlocks credibility tracking for your future tips.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <WorldIDButton onSuccess={handleVerified} onError={handleVerifyError} />
+            </div>
+            <button
+              onClick={() => submit(null)}
+              style={{
+                display: 'block',
+                margin: '2rem auto 0',
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.75rem',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >
+              Skip verification (lowers tip priority)
+            </button>
+          </div>
+        )}
+
+        {(step === 'analyzing' || step === 'encrypting' || step === 'submitting') && (
+          <EdgeAIProgress
+            stage={
+              step === 'submitting'
+                ? 'Submitting ciphertext'
+                : progressStage
+            }
+            detail={step === 'submitting' ? 'Sending encrypted payload to server' : progressDetail}
+            progress={step === 'submitting' ? undefined : progressValue}
+          />
+        )}
+
+        {step === 'confirmed' && (
+          <div style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.7rem',
+                color: 'var(--accent)',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                marginBottom: '1.5rem',
+              }}
+            >
+              TIP SUBMITTED
+            </div>
+            <h1
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.75rem',
+                color: 'var(--text-primary)',
+                marginBottom: '1rem',
+              }}
+            >
+              Your tip is encrypted and routed.
+            </h1>
+            <p
+              style={{
+                color: 'var(--text-secondary)',
+                fontSize: '0.9rem',
+                lineHeight: 1.6,
+                marginBottom: '2rem',
+              }}
+            >
+              Save this ID — it&apos;s the only way to check status or reference your tip.
+            </p>
+
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '1rem',
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--accent-dim)',
+                padding: '1rem 1.5rem',
+                marginBottom: '1.5rem',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '1.2rem',
+                  fontWeight: 500,
+                  color: 'var(--accent)',
+                  letterSpacing: '0.1em',
+                  wordBreak: 'break-all',
+                }}
+              >
+                {tipId}
+              </span>
+              <button
+                onClick={copyTipId}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid var(--border)',
+                  color: 'var(--text-secondary)',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.72rem',
+                  padding: '0.4rem 0.75rem',
+                  cursor: 'pointer',
+                  letterSpacing: '0.05em',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {copied ? 'COPIED' : 'COPY'}
+              </button>
+            </div>
+
+            <div>
+              <Link
+                href={`/status?tip_id=${tipId}`}
+                style={{
+                  display: 'inline-block',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.78rem',
+                  color: 'var(--accent)',
+                  textDecoration: 'underline',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Check status →
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {step === 'error' && (
+          <div style={{ textAlign: 'center' }}>
+            <p
+              style={{
+                color: 'var(--warning)',
+                fontFamily: "'IBM Plex Mono', monospace",
+                marginBottom: '1.5rem',
+              }}
+            >
+              {error}
+            </p>
+            <button
+              onClick={() => {
+                setStep('writing');
+                setError('');
+              }}
+              style={{
+                backgroundColor: 'transparent',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.85rem',
+                padding: '0.6rem 1.25rem',
+                cursor: 'pointer',
+              }}
+            >
+              Start over
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

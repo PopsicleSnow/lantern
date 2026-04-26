@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  turbopack: {},
+  serverExternalPackages: ['onnxruntime-node', 'sharp'],
 };
 
 export default nextConfig;

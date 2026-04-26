@@ -1,0 +1,6 @@
+uagents>=0.24.2
+requests>=2.31.0
+pymongo>=4.6.0
+python-dotenv>=1.0.0
+fastapi>=0.110.0
+uvicorn>=0.29.0
