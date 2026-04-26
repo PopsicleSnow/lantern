@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type { WorldIDProof } from './WorldIDButton';
 import EdgeAIProgress from './EdgeAIProgress';
+import ClaimBountyWidget from './ClaimBountyWidget';
 import { classify } from '@/lib/edge-ai/classify';
 import { computeMetadata } from '@/lib/edge-ai/quality';
 import { encryptToRecipient } from '@/lib/crypto/keypair';
@@ -238,6 +239,17 @@ export default function TipSubmissionForm() {
       }
 
       setTipId(meta.tip_id);
+      try {
+        const nullifier = verifiedProof?.nullifier ?? '';
+        if (nullifier && typeof window !== 'undefined') {
+          sessionStorage.setItem(
+            `lantern.tip.${meta.tip_id}.nullifier`,
+            nullifier
+          );
+        }
+      } catch {
+        // sessionStorage may be unavailable in private mode; not fatal.
+      }
       setStep('confirmed');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Submission failed');
@@ -840,7 +852,7 @@ export default function TipSubmissionForm() {
               </button>
             </div>
 
-            <div>
+            <div style={{ display: 'flex', gap: '1.25rem', flexWrap: 'wrap' }}>
               <Link
                 href={`/status?tip_id=${tipId}`}
                 style={{
@@ -854,7 +866,22 @@ export default function TipSubmissionForm() {
               >
                 Check status →
               </Link>
+              <Link
+                href="/bounties"
+                style={{
+                  display: 'inline-block',
+                  fontFamily: "'Source Code Pro', monospace",
+                  fontSize: '0.78rem',
+                  color: 'var(--text-secondary)',
+                  textDecoration: 'underline',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Browse bounties →
+              </Link>
             </div>
+
+            <ClaimBountyWidget tipId={tipId} />
           </div>
         )}
 

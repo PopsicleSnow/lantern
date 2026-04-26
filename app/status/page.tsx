@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import ClaimBountyWidget from '@/components/ClaimBountyWidget';
 
 interface StatusResponse {
   status: string;
@@ -234,6 +235,10 @@ function StatusInner() {
               We deliberately don&apos;t reveal which journalist read your tip — only that one did.
             </p>
           </div>
+        )}
+
+        {data && data.status === 'closed' && tipId && (
+          <ClaimBountyWidget tipId={tipId} />
         )}
       </div>
     </div>

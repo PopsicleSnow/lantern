@@ -112,25 +112,6 @@ export default function Navbar() {
           </div>
 
 
-          {/* Navigation Bar with Double Border */}
-          <nav style={{
-            borderTop: '2px solid var(--text-primary)',
-            borderBottom: '1px solid var(--text-primary)',
-            padding: '0.6rem 0',
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '2rem',
-            fontFamily: 'Arial, sans-serif',
-            fontSize: '0.8rem',
-            fontWeight: 'bold',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase'
-          }}>
-            <Link href="/" style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Home</Link>
-            <Link href="/how-it-works" style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>How It Works</Link>
-            <Link href="/submit" style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Submit a Tip</Link>
-            <Link href="/journalist" style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Journalist</Link>
-          </nav>
         </div>
       </div>
 
@@ -164,6 +145,7 @@ export default function Navbar() {
             <Link href="/" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Home</Link>
             <Link href="/how-it-works" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>How It Works</Link>
             <Link href="/submit" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Submit a Tip</Link>
+            <Link href="/bounties" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Bounties</Link>
             <Link href="/journalist" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Journalist Dashboard</Link>
             <Link href="/transparency" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Transparency</Link>
           </nav>

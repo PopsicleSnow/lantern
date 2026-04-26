@@ -6,6 +6,7 @@ import Link from 'next/link';
 import PriorityBadge from '@/components/PriorityBadge';
 import SecureDropPrompt from '@/components/SecureDropPrompt';
 import RatingControls from '@/components/journalist/RatingControls';
+import MarkClosedButton from '@/components/journalist/MarkClosedButton';
 import { useJournalistSession } from '@/lib/journalist/session';
 import { decryptFromSender } from '@/lib/crypto/keypair';
 import {
@@ -501,6 +502,14 @@ export default function TipDetailPage() {
 
             <div style={{ marginBottom: '1.5rem' }}>
               <RatingControls tip_id={tip._id} journalist_id={journalistId} />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <MarkClosedButton
+                tip_id={tip._id}
+                journalist_id={journalistId}
+                initialStatus={tip.status}
+              />
             </div>
 
             {journalist?.securedrop_url && <SecureDropPrompt url={journalist.securedrop_url} />}

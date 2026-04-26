@@ -13,6 +13,7 @@ export interface IJournalist extends Document {
   verified: boolean;
   active: boolean;
   tip_count: number;
+  solana_pubkey?: string;
 }
 
 const JournalistSchema = new Schema<IJournalist>({
@@ -28,6 +29,7 @@ const JournalistSchema = new Schema<IJournalist>({
   verified: { type: Boolean, default: false },
   active: { type: Boolean, default: true },
   tip_count: { type: Number, default: 0 },
+  solana_pubkey: { type: String, default: null },
 });
 
 export default (mongoose.models.Journalist as mongoose.Model<IJournalist>) ||

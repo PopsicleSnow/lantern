@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
           crypto: false,
           stream: false,
           buffer: false,
+          zlib: false,
+          http: false,
+          https: false,
+          net: false,
+          tls: false,
+          os: false,
         },
       };
       config.experiments = {

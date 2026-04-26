@@ -10,9 +10,12 @@
     "seed": "npx tsx scripts/seed-journalists.ts"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "^0.32.1",
+    "@solana/web3.js": "^1.98.4",
     "@worldcoin/idkit": "^4.1.2",
     "@worldcoin/idkit-server": "^1.1.1",
     "@xenova/transformers": "^2.17.2",
+    "bs58": "^6.0.0",
     "expo": "^55.0.17",
     "idb": "^8.0.3",
     "mongoose": "^9.5.0",
@@ -20,9 +23,9 @@
     "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-native": "0.83.6",
     "tweetnacl": "^1.0.3",
-    "tweetnacl-util": "^0.15.1",
-    "react-native": "0.83.6"
+    "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

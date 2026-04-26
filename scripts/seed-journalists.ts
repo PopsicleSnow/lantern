@@ -19,6 +19,7 @@ const journalists = [
     verified: true,
     active: true,
     tip_count: 0,
+    solana_pubkey: null,
   },
   {
     name: 'Jordan Lee',
@@ -30,6 +31,7 @@ const journalists = [
     verified: true,
     active: true,
     tip_count: 0,
+    solana_pubkey: null,
   },
   {
     name: 'Sam Washington',
@@ -41,6 +43,7 @@ const journalists = [
     verified: true,
     active: true,
     tip_count: 0,
+    solana_pubkey: null,
   },
   {
     name: 'Morgan Chen',
@@ -52,6 +55,7 @@ const journalists = [
     verified: true,
     active: true,
     tip_count: 0,
+    solana_pubkey: null,
   },
 ];
 

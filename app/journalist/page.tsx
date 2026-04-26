@@ -6,6 +6,7 @@ import TipCard from '@/components/TipCard';
 import KeypairSetup from '@/components/journalist/KeypairSetup';
 import PassphraseUnlock from '@/components/journalist/PassphraseUnlock';
 import RestoreFromBackup from '@/components/journalist/RestoreFromBackup';
+import CreateBountyForm from '@/components/CreateBountyForm';
 import { useJournalistSession } from '@/lib/journalist/session';
 import { loadKeystore, clearKeystore } from '@/lib/crypto/keystore';
 
@@ -430,6 +431,10 @@ export default function JournalistDashboard() {
             ))}
           </div>
         )}
+
+        <div style={{ marginTop: '3rem' }}>
+          <CreateBountyForm journalist_id={journalistId} />
+        </div>
       </div>
     </div>
   );

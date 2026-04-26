@@ -46,6 +46,11 @@ export interface ITip extends Document {
   read_at?: Date;
   read_by_journalist_id?: string;
   credibility_at_submission?: number;
+  bounty_claimed: boolean;
+  bounty_tx_sig?: string;
+  bounty_recipient?: string;
+  bounty_amount_lamports?: string;
+  bounty_claimed_at?: Date;
   created_at: Date;
   updated_at: Date;
 }
@@ -113,6 +118,11 @@ const TipSchema = new Schema<ITip>({
   read_at: { type: Date },
   read_by_journalist_id: { type: String },
   credibility_at_submission: { type: Number },
+  bounty_claimed: { type: Boolean, default: false },
+  bounty_tx_sig: { type: String, default: null },
+  bounty_recipient: { type: String, default: null },
+  bounty_amount_lamports: { type: String, default: null },
+  bounty_claimed_at: { type: Date, default: null },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
 });
