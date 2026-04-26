@@ -2,6 +2,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import styles from './page.module.css';
 import logoSvg from './icon0.svg';
+import JournalistEncryptDemo from '@/components/home/JournalistEncryptDemo';
+import SourceAnonymityDemo from '@/components/home/SourceAnonymityDemo';
+import BountyBoard from '@/components/BountyBoard';
 
 export default function Home() {
   return (
@@ -14,7 +17,7 @@ export default function Home() {
             <h1 className={styles.title} style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)' }}>
               ICEBERG<br />
               <span className={styles.titleHighlight} style={{ fontSize: 'clamp(1.5rem, 4vw, 3rem)', display: 'block', marginTop: '0.5rem' }}>
-                The Safesty Way to Show What's Below.
+                The Safesty Way to Show What&apos;s Below.
               </span>
             </h1>
             <p className={styles.subtitle}>
@@ -25,135 +28,130 @@ export default function Home() {
             <Link href="/submit" className={styles.primaryButton}>
               Submit a Tip
             </Link>
-            <Link href="/journalist" className={styles.secondaryButton}>
+            <Link href="/journalist/dashboard" className={styles.secondaryButton}>
               Journalist Sign In
             </Link>
           </div>
         </div>
       </section>
 
-      <section className={styles.stepsSection}>
-        <div className={styles.stepsContainer}>
-          <h2 className={styles.sectionTitle} style={{ marginBottom: '3rem' }}>Follow these steps to protect your anonymity</h2>
-          <ol className={styles.stepList}>
-            <li className={styles.stepItem}>
-              <div className={styles.stepNumber}>1</div>
-              <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>Choose a safe location</h3>
-                <p className={styles.stepDescription}>
-                  Never use a work computer or a network monitored by your employer. Find a public, trusted Wi-Fi network.
-                </p>
-              </div>
-            </li>
-            <li className={styles.stepItem}>
-              <div className={styles.stepNumber}>2</div>
-              <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>Verify anonymously via World ID</h3>
-                <p className={styles.stepDescription}>
-                  Iceberg uses World ID to verify you are a unique human without linking to your real identity or biometric data. This prevents spam while maintaining zero-knowledge privacy.
-                </p>
-              </div>
-            </li>
-            <li className={styles.stepItem}>
-              <div className={styles.stepNumber}>3</div>
-              <div className={styles.stepContent}>
-                <h3 className={styles.stepTitle}>Submit securely</h3>
-                <p className={styles.stepDescription}>
-                  Your data is encrypted locally in your browser before ever hitting the network. Only the journalist holding the private key can decrypt your message.
-                </p>
-              </div>
-            </li>
-          </ol>
-        </div>
-      </section>
+      <section id="journalists" className={styles.roleSection}>
+        <div className={styles.roleContainer}>
+          <span className={styles.roleEyebrow}>For Journalists</span>
+          <h2 className={styles.roleTitle}>
+            Receive sealed tips,
+            <br />
+            <span className={styles.roleTitleSecondary}>on your terms.</span>
+          </h2>
 
-      <section className={styles.directorySection}>
-        <div className={styles.directoryContainer}>
-          <h2 className={styles.sectionTitle} style={{ marginBottom: '3rem' }}>Share documents securely with trusted organizations</h2>
-          <div className={styles.directoryGrid}>
-            <Link href="/journalist" className={styles.orgCard}>
-              <h3 className={styles.orgName}>The Washington Post</h3>
-              <p className={styles.orgDescription}>The Washington Post is an American daily newspaper published in Washington, DC.</p>
-            </Link>
-            <Link href="/journalist" className={styles.orgCard}>
-              <h3 className={styles.orgName}>The Guardian</h3>
-              <p className={styles.orgDescription}>The Guardian is a British daily newspaper known for independent investigative journalism.</p>
-            </Link>
-            <Link href="/journalist" className={styles.orgCard}>
-              <h3 className={styles.orgName}>Der Spiegel</h3>
-              <p className={styles.orgDescription}>The SPIEGEL Group is a German media company that publishes print magazines and online news.</p>
-            </Link>
-            <Link href="/journalist" className={styles.orgCard}>
-              <h3 className={styles.orgName}>Disclose</h3>
-              <p className={styles.orgDescription}>A French non-profit investigative media organization dedicated to public interest journalism.</p>
-            </Link>
-          </div>
-          <div style={{ textAlign: 'left', marginTop: '3rem' }}>
-            <Link href="/journalist" className={styles.secondaryButton}>
-              See all verified journalists
-            </Link>
+          <div className={styles.roleGrid}>
+            <div className={styles.roleCopy}>
+              <p className={styles.roleLead}>
+                Iceberg routes verified, classified tips directly to the journalists who cover the beat.
+                Cleartext is sealed in the source&apos;s browser to your public key — Iceberg itself
+                never sees the message.
+              </p>
+
+              <ul className={styles.roleList}>
+                <li>
+                  <strong>Generate a keypair on first sign in.</strong> Your private key lives only
+                  on your device, encrypted by a passphrase you choose. We never get a copy.
+                </li>
+                <li>
+                  <strong>A Fetch.ai agent triages incoming tips</strong> using only metadata —
+                  category, urgency, structural quality, source credibility — then routes the
+                  sealed envelope to you and any peers covering that beat.
+                </li>
+                <li>
+                  <strong>Decrypt in your browser, rate the tip,</strong> and follow up with the
+                  source through your existing SecureDrop. Ratings feed back into source
+                  credibility so future signal rises.
+                </li>
+                <li>
+                  <strong>Post a Solana bounty for the beats you want.</strong> Escrow SOL on
+                  devnet, set a per-claim payout, and have the agent prefer your inbox for
+                  matching tips. Reclaim unspent funds any time.
+                </li>
+              </ul>
+
+              <div className={styles.roleActions}>
+                <Link href="/journalist/dashboard" className={styles.primaryButton}>
+                  Sign In to Dashboard
+                </Link>
+                <Link href="/transparency" className={styles.secondaryButton}>
+                  Verify a Public Key
+                </Link>
+              </div>
+            </div>
+
+            <div className={styles.roleVisual}>
+              <JournalistEncryptDemo />
+            </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.featuresSection}>
-        <div className={styles.featuresContainer}>
-          <h2 className={styles.sectionTitle}>What Iceberg does</h2>
-          <div className={styles.featuresGrid}>
-            <article className={styles.featureCard}>
-              <div className={styles.featureIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-              </div>
-              <h3 className={styles.featureTitle}>End-to-End Encryption</h3>
-              <p className={styles.featureText}>
-                Encrypts your data in transit and at rest. TweetNaCl encryption runs entirely client-side before submission.
-              </p>
-            </article>
+      <section id="sources" className={styles.roleSectionAlt}>
+        <div className={styles.roleContainer}>
+          <span className={styles.roleEyebrow}>For Sources</span>
+          <h2 className={styles.roleTitle}>
+            You speak.
+            <br />
+            <span className={styles.roleTitleSecondary}>We protect.</span>
+          </h2>
 
-            <article className={styles.featureCard}>
-              <div className={styles.featureIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              </div>
-              <h3 className={styles.featureTitle}>Minimizes Metadata</h3>
-              <p className={styles.featureText}>
-                Iceberg does not log your IP address, browser, or device details. We intentionally know as little about you as possible.
-              </p>
-            </article>
+          <div className={`${styles.roleGrid} ${styles.roleGridReverse}`}>
+            <div className={styles.roleVisual}>
+              <SourceAnonymityDemo />
+            </div>
 
-            <article className={styles.featureCard}>
-              <div className={styles.featureIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="2" ry="2"></rect><line x1="8" y1="2" x2="8" y2="22"></line><line x1="16" y1="2" x2="16" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
-              </div>
-              <h3 className={styles.featureTitle}>No Third Parties</h3>
-              <p className={styles.featureText}>
-                No centralized intermediaries can read or intercept tips. Autonomous Fetch.ai agents route information directly to vetted journalists.
+            <div className={styles.roleCopy}>
+              <p className={styles.roleLead}>
+                If you have evidence of wrongdoing, Iceberg is built so the platform itself can&apos;t
+                betray you. Your name, your network, your device — none of it touches our servers.
+                Only a sealed envelope and a proof you&apos;re a real human.
               </p>
-            </article>
 
-            <article className={styles.featureCard}>
-              <div className={styles.featureIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              <ul className={styles.roleList}>
+                <li>
+                  <strong>Verify humanity, not identity.</strong> World ID gives a one-shot proof
+                  you&apos;re a unique person without revealing who you are. Anti-bot, zero
+                  knowledge.
+                </li>
+                <li>
+                  <strong>Encryption happens on your device</strong> with TweetNaCl before anything
+                  hits the network. Cleartext never leaves your browser.
+                </li>
+                <li>
+                  <strong>Pin your tip to a journalist or beat,</strong> or let the Fetch.ai agent
+                  pick the best-matched recipients. Claim a Solana bounty if your tip leads to
+                  publication.
+                </li>
+              </ul>
+
+              <div className={styles.roleActions}>
+                <Link href="/submit" className={styles.primaryButton}>
+                  Submit a Tip
+                </Link>
+                <Link href="/how-it-works" className={styles.secondaryButton}>
+                  How It Works
+                </Link>
               </div>
-              <h3 className={styles.featureTitle}>Free & Open Source</h3>
-              <p className={styles.featureText}>
-                The platform is licensed as free and open source software. Public key transparency prevents key substitution attacks.
+            </div>
+          </div>
+
+          <div id="bounties" className={styles.bountiesBlock}>
+            <div className={styles.bountiesHeader}>
+              <h3 className={styles.bountiesTitle}>Active bounties</h3>
+              <p className={styles.bountiesSub}>
+                Journalists escrow SOL on devnet for tips that lead to a published story. Pick a
+                beat that fits — the bounty unlocks when the journalist marks the tip as closed.
               </p>
-            </article>
+            </div>
+            <BountyBoard />
           </div>
         </div>
       </section>
-
-      <section className={styles.manifestoSection}>
-        <div className={styles.manifestoContent}>
-          <blockquote className={styles.manifestoText}>
-            "We handle the complex encryption locally on your device before any data is sent over the network.
-            Not even the servers hosting The Iceberg can read your submissions. We are the tip of the iceberg;
-            the truth lies beneath the surface."
-          </blockquote>
-          <div className={styles.manifestoAuthor}>— The Essence of the Idea</div>
-        </div>
-      </section>
-
     </main>
   );
 }

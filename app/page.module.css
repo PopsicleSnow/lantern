@@ -147,86 +147,6 @@
   background-color: var(--surface);
 }
 
-.featuresSection {
-  padding: 6rem 1rem;
-  background-color: var(--surface);
-}
-
-.featuresContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.sectionTitle {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(2rem, 5vw, 3rem);
-  text-align: left;
-  margin-bottom: 4rem;
-  color: var(--text-primary);
-}
-
-.featuresGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-}
-
-.featureCard {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 2.5rem;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.featureCard::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.featureCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-  background: var(--surface);
-}
-
-.featureCard:hover::before {
-  opacity: 1;
-}
-
-.featureIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(0, 113, 227, 0.1);
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-}
-
-.featureTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.featureText {
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
 @keyframes fadeUp {
   0% {
     opacity: 0;
@@ -239,135 +159,173 @@
   }
 }
 
-.manifestoSection {
-  padding: 8rem 1rem;
-  background: var(--bg);
-  border-top: 1px solid var(--border);
-  text-align: left;
-}
+/* ============================================================
+ * Role sections — For Journalists / For Sources
+ * ============================================================ */
 
-.manifestoContent {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.manifestoText {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
-  line-height: 1.4;
-  color: var(--text-primary);
-  margin-bottom: 2rem;
-}
-
-.manifestoAuthor {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-}
-
-.stepsSection {
+.roleSection {
   padding: 6rem 1rem;
-  background-color: var(--bg);
-  border-top: 1px solid var(--border);
+  background-color: var(--surface);
   border-bottom: 1px solid var(--border);
 }
 
-.stepsContainer {
-  max-width: 800px;
+.roleSectionAlt {
+  padding: 6rem 1rem;
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.roleContainer {
+  max-width: 1180px;
   margin: 0 auto;
 }
 
-.stepList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.roleEyebrow {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1rem;
+}
+
+.roleTitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0 0 3rem;
+  font-weight: 700;
+}
+
+.roleTitleSecondary {
+  color: var(--text-secondary);
+}
+
+.roleGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.roleGridReverse {
+  /* Visual side first on desktop, copy second */
+  /* (default order matches markup) */
+}
+
+.roleCopy {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
 
-.stepItem {
+.roleLead {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  margin: 0 0 1.75rem;
+}
+
+.roleList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
   display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
 }
 
-.stepNumber {
-  background-color: var(--text-primary);
-  color: var(--surface);
-  width: 40px;
-  height: 40px;
+.roleList li {
+  position: relative;
+  padding-left: 1.5rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.roleList li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.65rem;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
+  background: var(--accent);
+}
+
+.roleList strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.roleActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+.roleVisual {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.2rem;
-  flex-shrink: 0;
+  min-height: 360px;
 }
 
-.stepContent {
-  padding-top: 0.3rem;
+/* Active bounties block inside the source section */
+
+.bountiesBlock {
+  margin-top: 5rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--border);
 }
 
-.stepTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
+.bountiesHeader {
+  margin-bottom: 2rem;
+  max-width: 720px;
+}
+
+.bountiesTitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.01em;
   color: var(--text-primary);
 }
 
-.stepDescription {
-  color: var(--text-secondary);
+.bountiesSub {
+  font-size: 1rem;
   line-height: 1.6;
-  margin: 0;
-}
-
-.directorySection {
-  padding: 6rem 1rem;
-  background-color: var(--surface);
-}
-
-.directoryContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.directoryGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
-
-.orgCard {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.orgCard:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(0, 113, 227, 0.1);
-  transform: translateY(-2px);
-}
-
-.orgName {
-  font-weight: 700;
-  font-size: 1.2rem;
-  margin: 0 0 0.5rem 0;
-}
-
-.orgDescription {
   color: var(--text-secondary);
-  font-size: 0.95rem;
-  line-height: 1.5;
   margin: 0;
+}
+
+@media (max-width: 880px) {
+  .roleGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .roleGridReverse .roleVisual {
+    /* On mobile show the visual after the copy for reverse-grid sections so
+       the heading-to-text flow stays readable. */
+    order: 2;
+  }
+
+  .roleVisual {
+    min-height: 0;
+  }
+
+  .roleSection,
+  .roleSectionAlt {
+    padding: 4rem 1rem;
+  }
+
+  .bountiesBlock {
+    margin-top: 3rem;
+    padding-top: 2rem;
+  }
 }

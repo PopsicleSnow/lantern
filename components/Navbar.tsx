@@ -144,8 +144,6 @@ export default function Navbar() {
           }}>
             <Link href="/" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Home</Link>
             <Link href="/how-it-works" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>How It Works</Link>
-            <Link href="/source" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>For Sources</Link>
-            <Link href="/journalist" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>For Journalists</Link>
             <Link href="/transparency" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Transparency</Link>
           </nav>
         </div>
