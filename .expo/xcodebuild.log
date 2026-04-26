@@ -1,0 +1,9 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -workspace /Users/popsiclesnow/Projects/lantern/ios/lantern.xcworkspace -configuration Debug -scheme lantern -destination id=00008140-000C1C2C1444801C
+
+Resolve Package Graph
+
+
+Resolved source packages:
+  ZeticMLangeiOS: https://github.com/zetic-ai/ZeticMLangeiOS @ 1.6.0
+

@@ -1,0 +1,7 @@
+2026-04-26 01:32:43.438 xcodebuild[88906:114435014] Writing error result bundle to /var/folders/rk/ng874l6x32b368ndhd8gklx00000gn/T/ResultBundle_2026-26-04_01-32-0043.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ id:00008140-000C1C2C1444801C }
+
+	Ineligible destinations for the "lantern" scheme:
+		{ platform:iOS, arch:arm64e, id:00008140-000C1C2C1444801C, name:Flashpoint, error:iOS 18.5 is not installed. To use with Xcode, first download and install the platform }
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 18.5 is not installed. To use with Xcode, first download and install the platform }
