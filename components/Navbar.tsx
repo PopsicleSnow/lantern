@@ -79,7 +79,7 @@ export default function Navbar() {
 
           {/* Right: Submit Tip Button */}
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Link href="/submit" style={{
+            <Link href="/source" style={{
               backgroundColor: 'var(--accent)',
               color: '#fff',
               padding: '0.4rem 0.8rem',
@@ -144,9 +144,8 @@ export default function Navbar() {
           }}>
             <Link href="/" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Home</Link>
             <Link href="/how-it-works" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>How It Works</Link>
-            <Link href="/submit" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Submit a Tip</Link>
-            <Link href="/bounties" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Bounties</Link>
-            <Link href="/journalist" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Journalist Dashboard</Link>
+            <Link href="/source" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>For Sources</Link>
+            <Link href="/journalist" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>For Journalists</Link>
             <Link href="/transparency" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none', color: 'var(--text-primary)' }}>Transparency</Link>
           </nav>
         </div>

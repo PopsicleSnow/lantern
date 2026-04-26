@@ -50,7 +50,7 @@ export default function TransparencyPage() {
             letterSpacing: '0.2em',
           }}
         >
-          LANTERN
+          ICEBERG
         </Link>
         <span style={{ color: 'var(--border)' }}>|</span>
         <span
