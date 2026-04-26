@@ -7,10 +7,12 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 
-// Minimal Phantom (and most other Solana wallet) interface — we don't need the
-// wallet-adapter ecosystem for our small surface area.
-export interface PhantomProvider {
+// Minimal interface shared by Phantom, Solflare, Backpack, etc. We don't need
+// the wallet-adapter ecosystem for our small surface area.
+export interface SolanaProvider {
   isPhantom?: boolean;
+  isSolflare?: boolean;
+  isBackpack?: boolean;
   publicKey?: PublicKey | null;
   isConnected?: boolean;
   connect: (opts?: { onlyIfTrusted?: boolean }) => Promise<{ publicKey: PublicKey }>;
@@ -19,37 +21,74 @@ export interface PhantomProvider {
   signAllTransactions?: (txs: Transaction[]) => Promise<Transaction[]>;
   on?: (event: string, handler: (...args: unknown[]) => void) => void;
 }
+// Back-compat alias.
+export type PhantomProvider = SolanaProvider;
 
 declare global {
   interface Window {
-    solana?: PhantomProvider;
-    phantom?: { solana?: PhantomProvider };
+    solana?: SolanaProvider;
+    phantom?: { solana?: SolanaProvider };
+    solflare?: SolanaProvider;
+    backpack?: SolanaProvider;
   }
 }
 
-export function getPhantom(): PhantomProvider | null {
-  if (typeof window === 'undefined') return null;
-  if (window.phantom?.solana?.isPhantom) return window.phantom.solana;
-  if (window.solana?.isPhantom) return window.solana;
-  return null;
+export type WalletKind = 'phantom' | 'solflare' | 'backpack';
+
+export interface DetectedWallet {
+  kind: WalletKind;
+  provider: SolanaProvider;
+  label: string;
 }
 
-export async function connectPhantom(): Promise<PublicKey> {
-  const provider = getPhantom();
+export function detectWallets(): DetectedWallet[] {
+  if (typeof window === 'undefined') return [];
+  const out: DetectedWallet[] = [];
+  const phantom = window.phantom?.solana ?? (window.solana?.isPhantom ? window.solana : null);
+  if (phantom) out.push({ kind: 'phantom', provider: phantom, label: 'Phantom' });
+  if (window.solflare?.isSolflare) {
+    out.push({ kind: 'solflare', provider: window.solflare, label: 'Solflare' });
+  }
+  if (window.backpack?.isBackpack) {
+    out.push({ kind: 'backpack', provider: window.backpack, label: 'Backpack' });
+  }
+  // Last-resort: an ambiguous window.solana injected by another wallet (e.g. Glow).
+  if (out.length === 0 && window.solana) {
+    out.push({ kind: 'phantom', provider: window.solana, label: 'Solana wallet' });
+  }
+  return out;
+}
+
+export function getProvider(preferred?: WalletKind): SolanaProvider | null {
+  const wallets = detectWallets();
+  if (preferred) {
+    const match = wallets.find((w) => w.kind === preferred);
+    if (match) return match.provider;
+  }
+  return wallets[0]?.provider ?? null;
+}
+export const getPhantom = (preferred?: WalletKind) => getProvider(preferred);
+
+export async function connectWallet(preferred?: WalletKind): Promise<PublicKey> {
+  const provider = getProvider(preferred);
   if (!provider) {
-    throw new Error('Phantom wallet not detected. Install it from https://phantom.app.');
+    throw new Error(
+      'No Solana wallet detected. Install Phantom (phantom.app), Solflare (solflare.com), or Backpack (backpack.app).'
+    );
   }
   const { publicKey } = await provider.connect();
   return publicKey;
 }
+export const connectPhantom = (preferred?: WalletKind) => connectWallet(preferred);
 
 export async function signAndSendInstruction(
   connection: Connection,
   ix: TransactionInstruction,
-  feePayer: PublicKey
+  feePayer: PublicKey,
+  preferred?: WalletKind
 ): Promise<string> {
-  const provider = getPhantom();
-  if (!provider) throw new Error('Phantom wallet not detected.');
+  const provider = getProvider(preferred);
+  if (!provider) throw new Error('No Solana wallet detected.');
 
   const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash('confirmed');
   const tx = new Transaction().add(ix);

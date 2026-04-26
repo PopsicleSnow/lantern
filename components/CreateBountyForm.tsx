@@ -2,7 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { Transaction } from '@solana/web3.js';
-import { connectPhantom, getPhantom } from '@/lib/solana/phantom';
+import {
+  connectWallet,
+  detectWallets,
+  getProvider,
+  type DetectedWallet,
+  type WalletKind,
+} from '@/lib/solana/phantom';
 import { getConnection, explorerTxUrl } from '@/lib/solana/connection';
 import { BEAT_SLUGS, BEAT_LABELS, type BeatSlug } from '@/lib/solana/beats';
 
@@ -12,6 +18,8 @@ interface Props {
 
 type Stage = 'idle' | 'connecting' | 'building' | 'signing' | 'sending' | 'done' | 'error';
 
+const WALLET_PREF_KEY = 'lantern.walletKind';
+
 export default function CreateBountyForm({ journalist_id }: Props) {
   const [walletPubkey, setWalletPubkey] = useState<string | null>(null);
   const [beat, setBeat] = useState<BeatSlug>('financial_fraud');
@@ -20,18 +28,32 @@ export default function CreateBountyForm({ journalist_id }: Props) {
   const [stage, setStage] = useState<Stage>('idle');
   const [error, setError] = useState('');
   const [txSig, setTxSig] = useState<string | null>(null);
-  const [hasPhantom, setHasPhantom] = useState(true);
+  const [available, setAvailable] = useState<DetectedWallet[]>([]);
+  const [selectedKind, setSelectedKind] = useState<WalletKind | null>(null);
 
   useEffect(() => {
+    const wallets = detectWallets();
+    const stored = (typeof window !== 'undefined'
+      ? (localStorage.getItem(WALLET_PREF_KEY) as WalletKind | null)
+      : null);
+    const initial =
+      stored && wallets.some((w) => w.kind === stored) ? stored : wallets[0]?.kind ?? null;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasPhantom(!!getPhantom());
+    setAvailable(wallets);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectedKind(initial);
   }, []);
+
+  const pickWallet = (kind: WalletKind) => {
+    setSelectedKind(kind);
+    if (typeof window !== 'undefined') localStorage.setItem(WALLET_PREF_KEY, kind);
+  };
 
   const connect = async () => {
     setError('');
     setStage('connecting');
     try {
-      const pk = await connectPhantom();
+      const pk = await connectWallet(selectedKind ?? undefined);
       setWalletPubkey(pk.toBase58());
       setStage('idle');
     } catch (e) {
@@ -78,8 +100,8 @@ export default function CreateBountyForm({ journalist_id }: Props) {
       if (!res.ok) throw new Error(data.error ?? `Server error (${res.status})`);
 
       setStage('signing');
-      const provider = getPhantom();
-      if (!provider) throw new Error('Phantom unavailable');
+      const provider = getProvider(selectedKind ?? undefined);
+      if (!provider) throw new Error('Wallet unavailable');
 
       const tx = Transaction.from(Buffer.from(data.transaction, 'base64'));
       const signed = await provider.signTransaction(tx);
@@ -129,7 +151,7 @@ export default function CreateBountyForm({ journalist_id }: Props) {
         whose tips you mark <code>closed</code> can claim the bounty to a one-time wallet.
       </p>
 
-      {!hasPhantom && (
+      {available.length === 0 && (
         <p
           style={{
             color: 'var(--warning)',
@@ -138,36 +160,61 @@ export default function CreateBountyForm({ journalist_id }: Props) {
             marginBottom: '0.75rem',
           }}
         >
-          Phantom wallet not detected.{' '}
-          <a
-            href="https://phantom.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--accent)' }}
-          >
-            Install Phantom
-          </a>{' '}
-          and reload to fund a bounty.
+          No Solana wallet detected. Install{' '}
+          <a href="https://phantom.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>Phantom</a>,{' '}
+          <a href="https://solflare.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>Solflare</a>, or{' '}
+          <a href="https://backpack.app" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>Backpack</a>{' '}
+          and reload.
         </p>
       )}
 
-      {!walletPubkey && hasPhantom && (
-        <button
-          onClick={connect}
-          disabled={stage === 'connecting'}
-          style={{
-            backgroundColor: 'var(--accent)',
-            color: '#0a0a0a',
-            border: 'none',
-            padding: '0.6rem 1rem',
-            fontFamily: "'IBM Plex Mono', monospace",
-            fontSize: '0.78rem',
-            letterSpacing: '0.05em',
-            cursor: 'pointer',
-          }}
-        >
-          {stage === 'connecting' ? 'Connecting…' : 'Connect Phantom'}
-        </button>
+      {!walletPubkey && available.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          {available.length > 1 && (
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+              {available.map((w) => {
+                const active = selectedKind === w.kind;
+                return (
+                  <button
+                    key={w.kind}
+                    onClick={() => pickWallet(w.kind)}
+                    style={{
+                      backgroundColor: active ? 'var(--accent)' : 'transparent',
+                      color: active ? '#0a0a0a' : 'var(--text-primary)',
+                      border: `1px solid ${active ? 'var(--accent)' : 'var(--border)'}`,
+                      padding: '0.4rem 0.75rem',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.72rem',
+                      letterSpacing: '0.05em',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {w.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <button
+            onClick={connect}
+            disabled={stage === 'connecting' || !selectedKind}
+            style={{
+              backgroundColor: 'var(--accent)',
+              color: '#0a0a0a',
+              border: 'none',
+              padding: '0.6rem 1rem',
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '0.78rem',
+              letterSpacing: '0.05em',
+              cursor: 'pointer',
+              alignSelf: 'flex-start',
+            }}
+          >
+            {stage === 'connecting'
+              ? 'Connecting…'
+              : `Connect ${available.find((w) => w.kind === selectedKind)?.label ?? 'wallet'}`}
+          </button>
+        </div>
       )}
 
       {walletPubkey && (
@@ -249,7 +296,7 @@ export default function CreateBountyForm({ journalist_id }: Props) {
             }}
           >
             {stage === 'building' && 'Building tx…'}
-            {stage === 'signing' && 'Sign in Phantom…'}
+            {stage === 'signing' && `Sign in ${available.find((w) => w.kind === selectedKind)?.label ?? 'wallet'}…`}
             {stage === 'sending' && 'Confirming…'}
             {(stage === 'idle' || stage === 'done' || stage === 'error') && 'Create bounty'}
           </button>

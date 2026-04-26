@@ -52,6 +52,7 @@ export default function TipSubmissionForm() {
   const [step, setStep] = useState<Step>('writing');
   const [content, setContent] = useState('');
   const [tipId, setTipId] = useState('');
+  const [submittedNullifier, setSubmittedNullifier] = useState<string>('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -239,17 +240,7 @@ export default function TipSubmissionForm() {
       }
 
       setTipId(meta.tip_id);
-      try {
-        const nullifier = verifiedProof?.nullifier ?? '';
-        if (nullifier && typeof window !== 'undefined') {
-          sessionStorage.setItem(
-            `lantern.tip.${meta.tip_id}.nullifier`,
-            nullifier
-          );
-        }
-      } catch {
-        // sessionStorage may be unavailable in private mode; not fatal.
-      }
+      setSubmittedNullifier(verifiedProof?.nullifier ?? '');
       setStep('confirmed');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Submission failed');
@@ -881,7 +872,10 @@ export default function TipSubmissionForm() {
               </Link>
             </div>
 
-            <ClaimBountyWidget tipId={tipId} />
+            <ClaimBountyWidget
+              tipId={tipId}
+              nullifierHash={submittedNullifier || undefined}
+            />
           </div>
         )}
 

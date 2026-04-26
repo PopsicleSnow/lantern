@@ -43,3 +43,9 @@ node_modules/
 
 # python
 __pycache__
+
+# solana / anchor — local validator state + build artifacts
+solana/test-ledger/
+solana/.anchor/
+solana/target/
+test-ledger/

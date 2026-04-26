@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import WorldIDButton, { type WorldIDProof } from '@/components/WorldIDButton';
 import { generateClaimWallet } from '@/lib/solana/claim-wallet';
 import { explorerTxUrl, explorerAddressUrl } from '@/lib/solana/connection';
 
@@ -17,18 +18,25 @@ interface AvailableResponse {
 
 interface Props {
   tipId: string;
-  // Optional: caller can pre-supply the nullifier (e.g. from sessionStorage on /submit
-  // confirmation screen). When omitted the widget reads sessionStorage itself.
+  // Optional: a caller (e.g. /submit confirmation right after a fresh verify)
+  // can pre-supply a freshly-verified nullifier so the user doesn't have to
+  // verify again seconds later. The /status flow always re-verifies.
   nullifierHash?: string;
 }
 
-type Stage = 'probing' | 'idle' | 'claiming' | 'success' | 'error' | 'unavailable';
+type Stage =
+  | 'probing'
+  | 'idle'
+  | 'verifying'
+  | 'claiming'
+  | 'success'
+  | 'error'
+  | 'unavailable';
 
 export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
   const [stage, setStage] = useState<Stage>('probing');
   const [availability, setAvailability] = useState<AvailableResponse | null>(null);
   const [error, setError] = useState('');
-  const [nullifier, setNullifier] = useState<string>(nullifierHash ?? '');
   const [wallet, setWallet] = useState<{ publicKey: string; secretKey: string } | null>(null);
   const [result, setResult] = useState<{
     tx_sig: string;
@@ -37,13 +45,7 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
   } | null>(null);
   const [savedAck, setSavedAck] = useState(false);
 
-  useEffect(() => {
-    if (!nullifierHash && typeof window !== 'undefined') {
-      const stored = sessionStorage.getItem(`lantern.tip.${tipId}.nullifier`);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (stored) setNullifier(stored);
-    }
-  }, [tipId, nullifierHash]);
+  const claimedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,13 +73,9 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
     };
   }, [tipId]);
 
-  const claim = async () => {
-    if (!nullifier) {
-      setError('No nullifier available. Bounties can only be claimed from the same browser session that submitted the tip.');
-      setStage('error');
-      return;
-    }
-    setError('');
+  const submitClaim = async (verifiedNullifier: string) => {
+    if (claimedRef.current) return;
+    claimedRef.current = true;
 
     let claimWallet = wallet;
     if (!claimWallet) {
@@ -86,13 +84,14 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
     }
 
     setStage('claiming');
+    setError('');
     try {
       const res = await fetch('/api/bounty/claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tip_id: tipId,
-          nullifier_hash: nullifier,
+          nullifier_hash: verifiedNullifier,
           recipient_wallet: claimWallet.publicKey,
         }),
       });
@@ -105,16 +104,27 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
         amount_sol: json.amount_sol,
       });
       setStage('success');
-      try {
-        sessionStorage.removeItem(`lantern.tip.${tipId}.nullifier`);
-      } catch {
-        // ignore
-      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Claim failed');
       setStage('error');
+      claimedRef.current = false;
     }
   };
+
+  // If a freshly-verified nullifier was passed in (only happens on the /submit
+  // confirmation screen seconds after the user verified for the tip itself),
+  // skip re-verification and claim immediately.
+  useEffect(() => {
+    if (
+      nullifierHash &&
+      stage === 'idle' &&
+      availability?.available &&
+      !claimedRef.current
+    ) {
+      void submitClaim(nullifierHash);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nullifierHash, stage, availability?.available]);
 
   if (stage === 'probing') {
     return (
@@ -145,11 +155,7 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
         </p>
 
         {wallet && (
-          <KeyExport
-            wallet={wallet}
-            saved={savedAck}
-            onSavedChange={setSavedAck}
-          />
+          <KeyExport wallet={wallet} saved={savedAck} onSavedChange={setSavedAck} />
         )}
 
         <p style={{ ...hintStyle, marginTop: '0.75rem' }}>
@@ -180,42 +186,41 @@ export default function ClaimBountyWidget({ tipId, nullifierHash }: Props) {
 
   return (
     <Wrapper>
-      <h3 style={titleStyle}>Claim {availability?.amount_per_claim_sol?.toFixed(4)} SOL bounty</h3>
+      <h3 style={titleStyle}>
+        Claim {availability?.amount_per_claim_sol?.toFixed(4)} SOL bounty
+      </h3>
       <p style={hintStyle}>
         A journalist marked this tip <strong>closed</strong> and a Solana bounty
-        is funded for the matching beat. Click below to generate a one-time
-        recipient wallet and have the platform&apos;s claim authority send the
-        SOL on your behalf. Your identity never reaches the chain.
+        is funded for the matching beat. Verify with World ID to prove
+        you&apos;re the same human who submitted the tip — the resulting
+        nullifier is deterministic and lets you claim from <em>any</em> browser
+        or device. The platform&apos;s claim authority then sends the SOL to a
+        one-time wallet generated locally. Your World ID and tip identity never
+        reach the chain.
       </p>
 
-      {nullifier ? (
-        <p style={hintStyle}>
-          <strong>Nullifier ready</strong> (stored in this browser&apos;s session).
+      {stage === 'claiming' ? (
+        <p style={{ ...hintStyle, color: 'var(--accent)', marginTop: '0.75rem' }}>
+          Claim authority is signing and submitting the transaction…
         </p>
       ) : (
-        <p style={{ ...hintStyle, color: 'var(--warning)' }}>
-          No nullifier in session. Bounties can only be claimed from the same
-          browser session that submitted the tip.
-        </p>
+        <div style={{ marginTop: '0.75rem' }}>
+          <WorldIDButton
+            onSuccess={(proof: WorldIDProof) => {
+              if (!proof.nullifier) {
+                setError('World ID returned no nullifier');
+                setStage('error');
+                return;
+              }
+              void submitClaim(proof.nullifier);
+            }}
+            onError={(err) => {
+              setError(err.message);
+              setStage('error');
+            }}
+          />
+        </div>
       )}
-
-      <button
-        disabled={!nullifier || stage === 'claiming'}
-        onClick={claim}
-        style={{
-          backgroundColor: nullifier ? 'var(--accent)' : 'var(--border)',
-          color: '#0a0a0a',
-          border: 'none',
-          padding: '0.7rem 1.1rem',
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '0.78rem',
-          letterSpacing: '0.05em',
-          cursor: nullifier && stage !== 'claiming' ? 'pointer' : 'not-allowed',
-          marginTop: '0.5rem',
-        }}
-      >
-        {stage === 'claiming' ? 'Claiming…' : 'Claim bounty'}
-      </button>
 
       {error && (
         <p style={{ ...hintStyle, color: 'var(--warning)', marginTop: '0.75rem' }}>
