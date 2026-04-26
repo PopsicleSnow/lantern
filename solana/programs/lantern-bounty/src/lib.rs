@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::system_program;
 
-declare_id!("Bounty11111111111111111111111111111111111111");
+declare_id!("2ioPpbP7NscjReJMqFWEumgs5MvQrq2kntFxkNnbxPvw");
 
 #[program]
 pub mod lantern_bounty {
