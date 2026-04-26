@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "Lantern",
+    "slug": "lantern-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "lantern",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "com.lantern.mobile",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.lantern.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0a0a"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "./modules/zetic-mlange"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "EXPO_PUBLIC_API_BASE": "http://10.0.2.2:3000",
+      "EXPO_PUBLIC_WLD_APP_ID": "app_5dbd91164b5db73916bf325a1757308a",
+      "EXPO_PUBLIC_WLD_ACTION": "submit-tip",
+      "EXPO_PUBLIC_WLD_ENVIRONMENT": "staging",
+      "EXPO_PUBLIC_ZETIC_PERSONAL_KEY": "ztp_70cfa89d2320450fa4a967b9373ab544",
+      "EXPO_PUBLIC_ZETIC_MODEL_NAME": "Steve/distilbert-base-multilingual-cased",
+      "EXPO_PUBLIC_ZETIC_MODEL_VERSION": "2"
+    }
+  }
+}

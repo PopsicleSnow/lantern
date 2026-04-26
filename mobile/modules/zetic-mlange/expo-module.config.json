@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android"],
+  "ios": {
+    "modules": ["ZeticMlangeModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.zeticmlange.ZeticMlangeModule"]
+  }
+}

@@ -468,10 +468,18 @@ close_bounty()              → journalist reclaims unclaimed escrow
 
 ## Phase 3 — ZETIC Melange Mobile App (React Native)
 
-Build only after Phase 1 is fully demoing. Separate app in `/mobile`.
+Scaffolded in `/mobile` (Expo SDK 52 + dev client). MVP scope: write → World ID (or skip) → classify → submit. No attachments, no preferences, no /status screen.
 
-- Expo SDK 51+ with `expo-dev-client` (ZETIC requires native modules)
-- World ID: `@worldcoin/idkit-react-native`
-- ZETIC Melange: `@zetic/mlange` — runs ONNX text classifier on-device
-- Same E2EE story: tip is encrypted on device to journalist pubkeys before upload
-- The web edge-AI library (`lib/edge-ai/`) is replaced by ZETIC on mobile, but produces the same `metadata` shape so the backend doesn't change
+- **Expo SDK 52** with `expo-dev-client` and Expo Router
+- **ZETIC.MLange** via a **custom Expo native module** at `mobile/modules/zetic-mlange/` (the published `react-native-zetic-mlange` npm package only targets the LLAMA_CPP / LLM template; we wrap `ZeticMLangeModel` directly for the small classifier path). Native deps: `com.zeticai.mlange:mlange:1.6.1` (Android, gradle) and `https://github.com/zetic-ai/ZeticMLangeiOS.git` exact `1.6.0` (iOS, Swift Package Manager — added manually in Xcode after `expo prebuild`). JS surface: `loadModel(personalKey, modelName, version?, modelMode?)` → handle, `run(handle, inputs: JSTensor[])` → `JSTensor[]` where `JSTensor = { shape, dtype: 'int32'|'int64'|'float32', data: Uint8Array }`.
+- **Model:** `Steve/distilbert-base-multilingual-cased` v2 (already in the Mlange catalog). This is a **base encoder, not an MNLI head** — Xenova MNLI doesn't convert via Mlange.
+- **Tokenizer:** pure-TS WordPiece (`mobile/lib/edge-ai/tokenizer.ts`) compatible with `AutoTokenizer.from_pretrained("distilbert-base-multilingual-cased")`. Configured **cased** (`doLowerCase: false, doStripAccents: false`). Vocab at `mobile/assets/distilbert-vocab.txt` (the cased multilingual `vocab.txt` from HuggingFace, ~119k tokens).
+- **Classifier (`mobile/lib/edge-ai/classify.ts`):** since the model has no MNLI head, classification is done by **embedding similarity** — encode the tip text into a mean-pooled 768-dim embedding, encode each beat label the same way (cached after first run), cosine-similarity, then tempered softmax (`temperature=0.05`) for confidence. Returns the same `EdgeClassification` shape as the web pipeline plus the text embedding for reuse in `quality.ts`. First tip costs 8 model runs (7 labels + 1 text); subsequent tips cost 1.
+- **Quality (`mobile/lib/edge-ai/quality.ts`):** when the embedding is available (always, in the normal flow), uses **web-parity weights** `0.25·length + 0.20·diversity + 0.20·sentence + 0.20·specificity + 0.15·norm` with `norm_score = min(1, ||embedding|| / 25)` (threshold tuned for distilbert-multilingual-cased — web uses 12 for all-MiniLM, different distribution). Falls back to `0.30/0.25/0.25/0.20` (no norm) if no embedding is supplied.
+- **Crypto:** `mobile/lib/crypto/keypair.ts` is a verbatim copy of `lib/crypto/keypair.ts`. `react-native-get-random-values` is imported once at `index.js` so `nacl.randomBytes` works.
+- **World ID:** `@worldcoin/idkit-react-native` via `mobile/components/WorldIDButton.tsx`; falls back gracefully if the package fails to resolve. Reuses the same `/api/worldid/rp-context` and `/api/worldid/verify` server routes.
+- **Networking:** `EXPO_PUBLIC_API_BASE` in `app.json` extras; default `http://10.0.2.2:3000` for Android emulator. Same `/api/tips/metadata` + `/api/tips/{id}/ciphertext` endpoints as web.
+- **Dtype assumption:** `classify.ts` packs token IDs as little-endian int64 (matches standard ONNX BERT export). Adjust `int32ToInt64Bytes` if the converted model expects int32.
+- The web edge-AI library (`lib/edge-ai/`) is replaced by ZETIC on mobile, but produces the same `metadata` shape so the backend doesn't change.
+
+See `mobile/README.md` for build/run instructions, model conversion steps, and verification checklist.

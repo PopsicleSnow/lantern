@@ -1,0 +1,39 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'expo.modules.zeticmlange'
+version = '0.1.0'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+apply from: expoModulesCorePlugin
+applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+useExpoPublishing()
+
+android {
+  namespace = "expo.modules.zeticmlange"
+  defaultConfig {
+    versionCode 1
+    versionName "0.1.0"
+    minSdkVersion rootProject.ext.has('minSdkVersion') ? rootProject.ext.get('minSdkVersion') : 24
+    compileSdkVersion rootProject.ext.has('compileSdkVersion') ? rootProject.ext.get('compileSdkVersion') : 34
+    targetSdkVersion rootProject.ext.has('targetSdkVersion') ? rootProject.ext.get('targetSdkVersion') : 34
+  }
+
+  // Required by ZETIC.MLange 1.6.x for native lib packaging.
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
+}
+
+repositories {
+  google()
+  mavenCentral()
+  maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+  implementation 'com.zeticai.mlange:mlange:1.6.1'
+}
