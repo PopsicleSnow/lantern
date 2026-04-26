@@ -23,9 +23,16 @@ export interface ITipMetadata {
   money_mentions: number;
 }
 
+export interface ITipPreferences {
+  category?: string;
+  organization?: string;
+  journalist_id?: string;
+}
+
 export interface ITip extends Document {
   nullifier_hash: string;
   metadata: ITipMetadata;
+  preferences?: ITipPreferences;
   ciphertexts: ICiphertextEntry[];
   verified_human: boolean;
   priority: 'high' | 'standard';
@@ -72,9 +79,19 @@ const TipMetadataSchema = new Schema<ITipMetadata>(
   { _id: false }
 );
 
+const TipPreferencesSchema = new Schema<ITipPreferences>(
+  {
+    category: { type: String },
+    organization: { type: String },
+    journalist_id: { type: String },
+  },
+  { _id: false }
+);
+
 const TipSchema = new Schema<ITip>({
   nullifier_hash: { type: String, required: true, index: true },
   metadata: { type: TipMetadataSchema, required: true },
+  preferences: { type: TipPreferencesSchema },
   ciphertexts: { type: [CiphertextEntrySchema], default: [] },
   verified_human: { type: Boolean, default: false },
   priority: { type: String, enum: ['high', 'standard'], default: 'standard' },

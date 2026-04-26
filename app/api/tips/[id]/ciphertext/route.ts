@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import dbConnect from '@/lib/mongodb';
 import Tip, { type ICiphertextEntry } from '@/lib/models/Tip';
+import Journalist from '@/lib/models/Journalist';
 
 function isValidCiphertext(c: unknown): c is ICiphertextEntry {
   if (!c || typeof c !== 'object') return false;
@@ -47,6 +49,15 @@ export async function POST(
   if (!has_assigned) tip.assigned_journalist_id = undefined;
   tip.updated_at = new Date();
   await tip.save();
+
+  if (tip.status === 'routed' && tip.assigned_journalist_id) {
+    if (mongoose.isValidObjectId(tip.assigned_journalist_id)) {
+      await Journalist.updateOne(
+        { _id: new mongoose.Types.ObjectId(tip.assigned_journalist_id) },
+        { $inc: { tip_count: 1 } }
+      );
+    }
+  }
 
   return NextResponse.json({
     tip_id: id,

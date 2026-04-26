@@ -8,6 +8,11 @@ import SecureDropPrompt from '@/components/SecureDropPrompt';
 import RatingControls from '@/components/journalist/RatingControls';
 import { useJournalistSession } from '@/lib/journalist/session';
 import { decryptFromSender } from '@/lib/crypto/keypair';
+import {
+  unwrapContentKey,
+  decryptFilename,
+  decryptFileBytes,
+} from '@/lib/crypto/file';
 
 interface TipMetadata {
   category: string;
@@ -25,6 +30,21 @@ interface TipMetadata {
   money_mentions: number;
 }
 
+interface AttachmentEntry {
+  _id: string;
+  file_nonce: string;
+  filename_ciphertext: string;
+  filename_nonce: string;
+  mime_type: string;
+  file_size: number;
+  wrapped_key: {
+    key_ciphertext: string;
+    key_nonce: string;
+    ephemeral_pubkey: string;
+  };
+  created_at: string;
+}
+
 interface TipResponse {
   _id: string;
   metadata: TipMetadata;
@@ -34,6 +54,7 @@ interface TipResponse {
     nonce: string;
     ephemeral_pubkey: string;
   };
+  attachments: AttachmentEntry[];
   verified_human: boolean;
   priority: 'high' | 'standard';
   status: string;
@@ -45,6 +66,13 @@ interface TipResponse {
   read_at: string | null;
   credibility_at_submission: number | null;
   created_at: string;
+}
+
+interface DecryptedAttachment {
+  id: string;
+  filename: string;
+  size: number;
+  mime_type: string;
 }
 
 interface JournalistProfile {
@@ -67,6 +95,9 @@ export default function TipDetailPage() {
   const [plaintext, setPlaintext] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [decryptedAttachments, setDecryptedAttachments] = useState<DecryptedAttachment[]>([]);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [downloadError, setDownloadError] = useState('');
 
   useEffect(() => {
     if (!session || session.journalist_id !== journalistId) {
@@ -99,6 +130,28 @@ export default function TipDetailPage() {
           const text = decryptFromSender(tipData.ciphertext, session.secret_key);
           setPlaintext(text);
 
+          const decryptedList: DecryptedAttachment[] = [];
+          for (const a of tipData.attachments ?? []) {
+            try {
+              const ck = unwrapContentKey(a.wrapped_key, session.secret_key);
+              const filename = decryptFilename(a.filename_ciphertext, a.filename_nonce, ck);
+              decryptedList.push({
+                id: a._id,
+                filename,
+                size: a.file_size,
+                mime_type: a.mime_type,
+              });
+            } catch {
+              decryptedList.push({
+                id: a._id,
+                filename: '(failed to decrypt filename)',
+                size: a.file_size,
+                mime_type: a.mime_type,
+              });
+            }
+          }
+          setDecryptedAttachments(decryptedList);
+
           fetch(`/api/tips/${tipId}/read`, {
             method: 'POST',
             headers: {
@@ -120,6 +173,41 @@ export default function TipDetailPage() {
     };
     load();
   }, [tipId, journalistId, session, router]);
+
+  const downloadAttachment = async (entry: DecryptedAttachment) => {
+    if (!tip || !session) return;
+    const meta = tip.attachments.find((a) => a._id === entry.id);
+    if (!meta) return;
+    setDownloadingId(entry.id);
+    setDownloadError('');
+    try {
+      const res = await fetch(
+        `/api/tips/${tipId}/attachment/${entry.id}?journalist_id=${encodeURIComponent(
+          journalistId
+        )}`,
+        { headers: { Authorization: 'Bearer demo-token' } }
+      );
+      if (!res.ok) throw new Error(`Download failed (${res.status})`);
+      const buf = new Uint8Array(await res.arrayBuffer());
+      const ck = unwrapContentKey(meta.wrapped_key, session.secret_key);
+      const plain = decryptFileBytes(buf, meta.file_nonce, ck);
+      const blob = new Blob([new Uint8Array(plain)], {
+        type: meta.mime_type || 'application/octet-stream',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = entry.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setDownloadError(e instanceof Error ? e.message : 'Download failed');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg)' }}>
@@ -299,6 +387,92 @@ export default function TipDetailPage() {
             >
               {plaintext ?? '...'}
             </div>
+
+            {decryptedAttachments.length > 0 && (
+              <>
+                <div
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '0.7rem',
+                    color: 'var(--text-secondary)',
+                    marginBottom: '0.5rem',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  Attachments ({decryptedAttachments.length})
+                </div>
+                <ul
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: '0 0 2rem',
+                    display: 'grid',
+                    gap: '0.5rem',
+                  }}
+                >
+                  {decryptedAttachments.map((a) => (
+                    <li
+                      key={a.id}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        backgroundColor: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        padding: '0.65rem 0.85rem',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: '0.8rem',
+                        color: 'var(--text-secondary)',
+                        gap: '1rem',
+                      }}
+                    >
+                      <span
+                        style={{
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {a.filename}{' '}
+                        <span style={{ opacity: 0.6 }}>· {Math.ceil(a.size / 1024)} KB</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => downloadAttachment(a)}
+                        disabled={downloadingId === a.id}
+                        style={{
+                          background: 'transparent',
+                          border: '1px solid var(--accent-dim)',
+                          color: 'var(--accent)',
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: '0.72rem',
+                          padding: '0.3rem 0.65rem',
+                          cursor: downloadingId === a.id ? 'wait' : 'pointer',
+                          letterSpacing: '0.05em',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {downloadingId === a.id ? 'DECRYPTING…' : 'DOWNLOAD'}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                {downloadError && (
+                  <p
+                    style={{
+                      color: 'var(--warning)',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.78rem',
+                      marginTop: '-1.25rem',
+                      marginBottom: '2rem',
+                    }}
+                  >
+                    {downloadError}
+                  </p>
+                )}
+              </>
+            )}
 
             <div
               style={{

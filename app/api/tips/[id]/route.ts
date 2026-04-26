@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Tip from '@/lib/models/Tip';
+import Attachment from '@/lib/models/Attachment';
 
 export async function GET(
   req: NextRequest,
@@ -48,10 +49,64 @@ export async function GET(
     return NextResponse.json({ error: 'Forbidden: not a recipient' }, { status: 403 });
   }
 
+  const rawAttachments = await Attachment.find(
+    { tip_id: id },
+    {
+      _id: 1,
+      file_nonce: 1,
+      filename_ciphertext: 1,
+      filename_nonce: 1,
+      mime_type: 1,
+      file_size: 1,
+      wrapped_keys: 1,
+      created_at: 1,
+    }
+  )
+    .sort({ created_at: 1 })
+    .lean<
+      Array<{
+        _id: unknown;
+        file_nonce: string;
+        filename_ciphertext: string;
+        filename_nonce: string;
+        mime_type: string;
+        file_size: number;
+        wrapped_keys: Array<{
+          journalist_id: string;
+          key_ciphertext: string;
+          key_nonce: string;
+          ephemeral_pubkey: string;
+        }>;
+        created_at: Date;
+      }>
+    >();
+
+  const attachments = rawAttachments
+    .map((a) => {
+      const wrapped = a.wrapped_keys.find((w) => w.journalist_id === journalist_id);
+      if (!wrapped) return null;
+      return {
+        _id: String(a._id),
+        file_nonce: a.file_nonce,
+        filename_ciphertext: a.filename_ciphertext,
+        filename_nonce: a.filename_nonce,
+        mime_type: a.mime_type,
+        file_size: a.file_size,
+        wrapped_key: {
+          key_ciphertext: wrapped.key_ciphertext,
+          key_nonce: wrapped.key_nonce,
+          ephemeral_pubkey: wrapped.ephemeral_pubkey,
+        },
+        created_at: a.created_at,
+      };
+    })
+    .filter((a): a is NonNullable<typeof a> => a !== null);
+
   return NextResponse.json({
     _id: String(tip._id),
     metadata: tip.metadata,
     ciphertext,
+    attachments,
     verified_human: tip.verified_human,
     priority: tip.priority,
     status: tip.status,

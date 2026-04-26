@@ -1,10 +1,11 @@
-import type { ITipMetadata } from './models/Tip';
+import type { ITipMetadata, ITipPreferences } from './models/Tip';
 
 export interface AgentTriagePayload {
   tip_id: string;
   metadata: ITipMetadata;
   verified_human: boolean;
   credibility: number;
+  preferences?: ITipPreferences;
 }
 
 export interface AgentRecipient {

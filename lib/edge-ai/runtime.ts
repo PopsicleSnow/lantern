@@ -7,6 +7,9 @@ export async function configureTransformers() {
   const { env } = await import('@xenova/transformers');
   env.allowLocalModels = false;
   env.useBrowserCache = true;
+  // Point onnxruntime-web at the statically-served WASM files so they're
+  // found regardless of how the JS chunk is named/located after bundling.
+  env.backends.onnx.wasm.wasmPaths = '/ort-wasm/';
   configured = true;
 }
 

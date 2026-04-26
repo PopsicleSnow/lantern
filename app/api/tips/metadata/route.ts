@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
-import Tip, { type ITipMetadata } from '@/lib/models/Tip';
+import Tip, { type ITipMetadata, type ITipPreferences } from '@/lib/models/Tip';
 import NullifierLog from '@/lib/models/NullifierLog';
 import { verifyWorldIDProof } from '@/lib/worldid';
 import { triageWithAgent } from '@/lib/agent-client';
@@ -23,9 +23,23 @@ function isValidMetadata(m: unknown): m is ITipMetadata {
   );
 }
 
+function parsePreferences(raw: unknown): ITipPreferences | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const p = raw as Record<string, unknown>;
+  const out: ITipPreferences = {};
+  if (typeof p.category === 'string' && p.category.trim()) out.category = p.category.trim();
+  if (typeof p.organization === 'string' && p.organization.trim()) {
+    out.organization = p.organization.trim();
+  }
+  if (typeof p.journalist_id === 'string' && p.journalist_id.trim()) {
+    out.journalist_id = p.journalist_id.trim();
+  }
+  return out.category || out.organization || out.journalist_id ? out : undefined;
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { metadata, idkit_response } = body;
+  const { metadata, idkit_response, preferences: rawPreferences } = body;
 
   if (!isValidMetadata(metadata)) {
     return NextResponse.json({ error: 'Invalid metadata' }, { status: 400 });
@@ -33,6 +47,8 @@ export async function POST(req: NextRequest) {
   if (metadata.char_count > 5000) {
     return NextResponse.json({ error: 'Tip exceeds 5000 characters' }, { status: 400 });
   }
+
+  const preferences = parsePreferences(rawPreferences);
 
   await dbConnect();
 
@@ -74,6 +90,7 @@ export async function POST(req: NextRequest) {
   const tip = await Tip.create({
     nullifier_hash: nullifier,
     metadata,
+    preferences,
     ciphertexts: [],
     verified_human,
     priority: 'standard',
@@ -93,9 +110,11 @@ export async function POST(req: NextRequest) {
     metadata,
     verified_human,
     credibility,
+    preferences,
   });
 
-  const decision = agentResult ?? (await triageFallback({ metadata, verified_human, credibility }));
+  const decision =
+    agentResult ?? (await triageFallback({ metadata, verified_human, credibility, preferences }));
 
   tip.priority = decision.priority;
   tip.assigned_journalist_id = decision.assigned_journalist_id;

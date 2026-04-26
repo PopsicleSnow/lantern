@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from triage_agent import lantern_agent, TipMetadata, TriagePayload, triage_tip
+from typing import Optional
+from triage_agent import (
+    lantern_agent,
+    TipMetadata,
+    TipPreferences,
+    TriagePayload,
+    triage_tip,
+)
 import uvicorn
 import threading
 from dotenv import load_dotenv
@@ -26,21 +33,32 @@ class MetadataPayload(BaseModel):
     money_mentions: int
 
 
+class PreferencesPayload(BaseModel):
+    category: Optional[str] = None
+    organization: Optional[str] = None
+    journalist_id: Optional[str] = None
+
+
 class TriageRequest(BaseModel):
     tip_id: str
     metadata: MetadataPayload
     verified_human: bool
     credibility: float
+    preferences: Optional[PreferencesPayload] = None
 
 
 @app.post("/triage")
 async def receive_tip(req: TriageRequest):
     metadata = TipMetadata(**req.metadata.model_dump())
+    preferences = (
+        TipPreferences(**req.preferences.model_dump()) if req.preferences else None
+    )
     payload = TriagePayload(
         tip_id=req.tip_id,
         metadata=metadata,
         verified_human=req.verified_human,
         credibility=req.credibility,
+        preferences=preferences,
     )
     return await triage_tip(payload)
 

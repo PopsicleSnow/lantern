@@ -3,13 +3,16 @@ from uagents_core.contrib.protocols.chat import (
     ChatMessage, ChatAcknowledgement, TextContent, chat_protocol_spec
 )
 from gemma_client import decide_priority
-from journalist_store import find_matching_journalists, find_all_journalists
+from journalist_store import (
+    find_matching_journalists,
+    find_all_journalists,
+    find_journalists_for_preferences,
+)
 from db import get_db
 from datetime import datetime, timezone
+from typing import Optional
 from uuid import uuid4
 import os
-
-CONFIDENCE_THRESHOLD = 0.55
 
 
 class TipMetadata(Model):
@@ -28,11 +31,26 @@ class TipMetadata(Model):
     money_mentions: int
 
 
+class TipPreferences(Model):
+    category: Optional[str] = None
+    organization: Optional[str] = None
+    journalist_id: Optional[str] = None
+
+
 class TriagePayload(Model):
     tip_id: str
     metadata: TipMetadata
     verified_human: bool
     credibility: float
+    preferences: Optional[TipPreferences] = None
+
+
+def _preferences_dict(p: Optional[TipPreferences]) -> dict:
+    if p is None:
+        return {}
+    if hasattr(p, 'dict'):
+        return {k: v for k, v in p.dict().items() if v}
+    return {k: v for k, v in dict(p).items() if v}
 
 
 _mailbox_env = os.getenv("AGENT_MAILBOX", "true").lower()
@@ -40,6 +58,7 @@ _mailbox_enabled = _mailbox_env not in ("false", "0", "no", "off")
 
 lantern_agent = Agent(
     name="lantern_triage",
+    network="testnet",
     seed=os.getenv("AGENT_SEED", "lantern_secret_seed_change_this"),
     mailbox=_mailbox_enabled,
     port=8001,
@@ -52,14 +71,18 @@ if not _mailbox_enabled:
 async def triage_tip(payload: TriagePayload) -> dict:
     """Metadata-only triage. Returns the routing decision (no DB writes)."""
     md = payload.metadata.dict() if hasattr(payload.metadata, 'dict') else dict(payload.metadata)
+    prefs = _preferences_dict(payload.preferences)
 
     decision = await decide_priority(md, payload.verified_human, payload.credibility)
     priority = decision.get("priority", "standard")
     reasoning = decision.get("reasoning", "")
 
-    candidates = await find_matching_journalists(md.get("beats", []))
-    if not candidates:
-        candidates = await find_all_journalists()
+    if prefs:
+        candidates = await find_journalists_for_preferences(prefs, md.get("beats", []))
+    else:
+        candidates = await find_matching_journalists(md.get("beats", []))
+        if not candidates:
+            candidates = await find_all_journalists()
 
     recipients = [
         {"journalist_id": str(j["_id"]), "public_key": j["public_key"]}
@@ -67,7 +90,7 @@ async def triage_tip(payload: TriagePayload) -> dict:
         if j.get("public_key")
     ]
 
-    if md.get("confidence", 0) >= CONFIDENCE_THRESHOLD and recipients:
+    if recipients:
         status = "routed"
         assigned = recipients[0]["journalist_id"]
     else:

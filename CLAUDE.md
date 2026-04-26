@@ -16,8 +16,8 @@ Phases 2 and 3 are independent. All phases share the same backend API and MongoD
 
 Lantern is an anonymous, end-to-end-encrypted whistleblower/tip submission platform.
 
-- **Tippers** classify their tip in their own browser (Transformers.js + ONNX Runtime Web), prove humanity via World ID, and encrypt the tip to one or more journalist public keys (TweetNaCl `box`) before submitting. The cleartext never leaves the browser.
-- **The server** stores ciphertexts + structural metadata only (length, category, confidence, has_dates, structural_quality, ...). It cannot decrypt tips.
+- **Tippers** classify their tip in their own browser (Transformers.js + ONNX Runtime Web), prove humanity via World ID, and encrypt the tip to one or more journalist public keys (TweetNaCl `box`) before submitting. The cleartext never leaves the browser. Tippers may optionally attach files (encrypted with the same hybrid envelope scheme — see Attachments) and pin routing to a specific category, newsgroup, and/or journalist.
+- **The server** stores ciphertexts + structural metadata + opaque attachment blobs only. It cannot decrypt tips, files, or even original filenames.
 - **Fetch.ai** receives metadata + trust signals (verified_human, source credibility) and decides priority + which journalist gets routed. It calls **ASI:One** as its LLM — but only on metadata, never cleartext.
 - **Journalists** generate a TweetNaCl keypair on first login. The private key is encrypted with a passphrase (PBKDF2-SHA256 → secretbox) and stored in IndexedDB on their device. A backup `.json` file is offered for recovery. The public key is uploaded to the server and listed on a public `/transparency` page so sources can verify the key wasn't substituted.
 - **Tippers** can check `/status?tip_id=...` to see whether a journalist has read their tip — without learning which one.
@@ -42,22 +42,31 @@ TIPPER (browser)
                           has_entities, has_dates, has_specifics,
                           structural_quality, entity_count, date_count,
                           money_mentions }
-  Step 4  POST /api/tips/metadata { metadata, idkit_response }
+  Step 4  POST /api/tips/metadata { metadata, idkit_response, preferences? }
             ← server: persist Tip in 'awaiting_ciphertext'
             ← Fetch.ai: decide priority + recipients (uses ASI:One on metadata)
+                preferences narrow the recipient pool (journalist > org > category)
             ← { tip_id, recipients: [{ journalist_id, public_key }] }
   Step 5  Encrypt cleartext to each recipient (TweetNaCl box, ephemeral keypair)
+  Step 5b For each attachment (optional, ≤5 files × 10MB):
+            generate random content key →
+            secretbox(file, nonce_f, content_key) →
+            secretbox(filename, nonce_n, content_key) →
+            for each recipient: box(content_key, recipient_pubkey) →
+            POST /api/tips/{tip_id}/attachment (multipart: ciphertext + meta JSON)
   Step 6  POST /api/tips/{tip_id}/ciphertext { ciphertexts: [...] }
-            ← status flips to 'routed' or 'human_review'
-  Cleartext NEVER leaves the browser.
+            ← status flips to 'routed' (when ≥1 recipient) or 'human_review' (zero recipients)
+            ← assigned journalist's tip_count increments by 1
+  Cleartext + file bytes NEVER leave the browser.
 
 SERVER (Next.js, MongoDB)
-  Stores: ciphertexts + metadata + nullifier hash + status + read_at
-  Cannot decrypt anything.
+  Stores: ciphertexts + metadata + nullifier hash + status + read_at + opaque attachment blobs
+  Cannot decrypt anything (including filenames).
 
 FETCH.AI AGENT (Python, FastAPI on :8000, uAgents on :8001)
-  /triage receives metadata only.
-  Calls ASI:One on metadata JSON to choose priority + journalist.
+  /triage receives metadata + optional preferences only.
+  Calls ASI:One on metadata JSON to choose priority.
+  Recipient pool: preferences-filtered if any; else beat-matched; else all-active.
   Falls back to deterministic rules if ASI:One unavailable.
   Chat Protocol unchanged for Agentverse demo.
 
@@ -67,7 +76,8 @@ JOURNALIST (browser)
                backup. Upload public key to server.
   Returning login: enter passphrase → unlock secret key from IndexedDB.
   Dashboard: list metadata; on click, fetch the ciphertext entry matching this
-             journalist_id, decrypt in-browser, mark read_at.
+             journalist_id, decrypt body in-browser, mark read_at, decrypt each
+             attachment's filename, click DOWNLOAD to fetch + decrypt file bytes.
   Rate tip: 'valuable' / 'dismissed' → updates nullifier credibility.
 
 PUBLIC PAGES
@@ -81,14 +91,14 @@ PUBLIC PAGES
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Frontend | Next.js 16.2.4 (App Router) | UI + API routes |
+| Frontend | Next.js 16.2.4 (App Router, webpack) | UI + API routes |
 | Proof of Humanity | World ID IDKit v4 (`@worldcoin/idkit@^4`) | Anti-bot, nullifier anonymity |
 | RP Signing | `@worldcoin/idkit-server` | Server-side ECDSA RP context |
 | Edge AI | `@xenova/transformers` (ONNX Runtime Web + WebGPU fallback to WASM) | In-browser classification + quality metadata |
-| E2EE | `tweetnacl` + `tweetnacl-util` | `box` for tip encryption, `secretbox` for passphrase wrap |
+| E2EE | `tweetnacl` + `tweetnacl-util` | `box` for tip body + content-key wrap; `secretbox` for file/filename + passphrase wrap |
 | KDF | WebCrypto PBKDF2-SHA256 (600k iterations) | Passphrase → key for wrapping the secret key |
 | Keystore | `idb` (IndexedDB) | Stores the encrypted secret key locally |
-| Agent Framework | Fetch.ai uAgents (Python) | Metadata-only triage, registered on Agentverse |
+| Agent Framework | Fetch.ai uAgents ≥0.24.2 (Python) | Metadata-only triage, registered on Agentverse |
 | Priority LLM | ASI:One LLM (`asi1` model) | Called by Fetch.ai on metadata only |
 | Database | MongoDB Atlas (Mongoose) | Tips (ciphertext + metadata), journalists, credibility |
 | Styling | Inline CSS variables + Tailwind v4 | Dark editorial theme |
@@ -97,22 +107,62 @@ PUBLIC PAGES
 
 ## Implementation Notes
 
-- **Cleartext never leaves the browser.** This rule is enforced at the API surface: `/api/tips/metadata` accepts metadata only, `/api/tips/{id}/ciphertext` accepts ciphertexts only. There is no endpoint that takes cleartext tip content. Old `POST /api/tips` is removed.
+- **Cleartext never leaves the browser.** This rule is enforced at the API surface: `/api/tips/metadata` accepts metadata + optional preferences only, `/api/tips/{id}/ciphertext` accepts ciphertexts only, `/api/tips/{id}/attachment` accepts only opaque ciphertext blobs + per-recipient wrapped keys (no plaintext, no plaintext filenames). There is no endpoint that takes cleartext tip content or file bytes. Old `POST /api/tips` is removed.
 - **Edge AI:** `lib/edge-ai/classify.ts` wraps Transformers.js zero-shot classification; `lib/edge-ai/quality.ts` runs the embedding model + heuristic detectors (date/money/entity regexes) to produce metadata. WebGPU is preferred but falls back to WASM. First load downloads ~60–100 MB; cached afterward.
 - **Encryption primitives:** TweetNaCl `box` uses curve25519+xsalsa20+poly1305. We generate an ephemeral sender keypair per encryption and store `{ ciphertext, nonce, ephemeral_pubkey }` per recipient.
 - **Passphrase wrap:** `lib/crypto/passphrase.ts` derives a 32-byte key with WebCrypto PBKDF2-SHA256 (600k iterations) and wraps the secret key with `nacl.secretbox`. The encrypted blob (`{ version, kdf, iterations, salt, nonce, ciphertext }`) lives in IndexedDB under `lantern-keystore/journalist-keys`.
 - **Backup file:** A signed-out journalist can restore by uploading their `lantern-key-{journalist_id}.json` and choosing a new passphrase. There is no other recovery — losing the passphrase + backup means losing access to all routed tips forever.
-- **Two-pass submit:** The browser cannot encrypt to journalists until the server returns recipient pubkeys. Step 1 is metadata-only; step 2 is ciphertext-only. The DB has an intermediate `awaiting_ciphertext` status.
+- **Two-pass submit (with optional attachment leg):** The browser cannot encrypt to journalists until the server returns recipient pubkeys. Step 1 is metadata-only; if files are picked, an interleaved attachment-upload leg runs per file (encrypt → multipart POST); step 2 is ciphertext-only. The DB has an intermediate `awaiting_ciphertext` status — attachments are only accepted while the tip is in this state.
+- **Routing rule:** A tip is `routed` whenever the recipient pool is non-empty; the assigned journalist is `recipients[0]` (best beat match, lowest `tip_count` first in the Python agent). `human_review` is now reserved for the genuine zero-recipient case (e.g., the tipper picked a now-inactive journalist via preferences, or no journalists with keys exist for the chosen newsgroup). The earlier `confidence < 0.55 → human_review` gate has been removed; confidence still influences priority via ASI:One but no longer blocks routing.
+- **Tipper routing preferences:** Optional `Tip.preferences = { category?, organization?, journalist_id? }`. Filtering precedence: a specific journalist locks the recipient pool to just that one; a newsgroup filters by `Journalist.organization`; a category narrows beats. Multiple preferences stack (most specific wins). Stored on the Tip for transparency/audit. Note: choosing a specific journalist/newsgroup *does* leak that choice to the server as metadata — the tip itself stays E2EE, but the routing intent is visible. The UI in `TipSubmissionForm` mirrors this in copy.
+- **`tip_count` increment:** Incremented on the assigned journalist exactly once per tip, in the ciphertext POST handler (`app/api/tips/[id]/ciphertext/route.ts`) when status flips to `routed`. Doing it earlier (metadata step) would over-count tippers who bail before final submit. The Python agent's load-balancing sort (`journalist_store.py:.sort('tip_count', 1)`) only works once this is incrementing.
+- **Encrypted attachments (envelope encryption):** Files use a hybrid scheme because TweetNaCl `box` is not chunked. Per file: (1) browser generates a random 32-byte content key, (2) `nacl.secretbox(file_bytes, file_nonce, content_key)` and `nacl.secretbox(filename, filename_nonce, content_key)`, (3) for each recipient, `nacl.box(content_key, key_nonce, recipient_pubkey, ephemeral_secret)` produces a wrapped key. Server stores: opaque file ciphertext + nonces + per-recipient wrapped keys + mime + size in a separate `Attachment` collection (`tip_id` ref). Caps: 10MB per file, 5 files per tip. GridFS is the right answer for larger files; current path stores binary as a `Buffer` field which is bounded by Mongo's 16MB document limit. Crypto helpers live in `lib/crypto/file.ts`.
 - **Credibility scoring:** `lib/credibility.ts` tracks `total_tips`, `valuable_count`, `dismissed_count` per nullifier. Score = `(valuable + 1) / (valuable + dismissed + 2)` (Laplace smoothing, default 0.5). Captured into `Tip.credibility_at_submission` for Fetch.ai input.
 - **Status tracking:** `read_at` and `read_by_journalist_id` are set when a journalist successfully decrypts. `/api/tips/{id}/status` is public and exposes only `{ status, created_at, read, read_at, priority, category }` — never the journalist identity.
 - **World ID is IDKit v4 (World ID 4.0)** — uses `IDKitRequestWidget` + `orbLegacy()` preset. Requires server-side ECDSA RP context via `@worldcoin/idkit-server`. Two server routes: `POST /api/worldid/rp-context` and `POST /api/worldid/verify`. `allow_legacy_proofs: true` through June 1 2026.
 - **ASI:One usage:** Fetch.ai calls ASI:One inside `agents/gemma_client.py` (`decide_priority`). Filename retained for historical reasons; the cleartext-classification function it used to expose is gone. Prompt receives metadata + verified_human + credibility only.
-- **Tip model fields:** `metadata` (full edge-AI output), `ciphertexts` (per-recipient), `read_at`, `read_by_journalist_id`, `credibility_at_submission`. Removed: `content`, `ai_summary`, `zetic_classification`. `classification_source` enum: `'edge_ai' | 'asi1_meta' | 'manual'`.
+- **Tip model fields:** `metadata` (full edge-AI output), `ciphertexts` (per-recipient), `preferences?` (`{ category?, organization?, journalist_id? }`), `read_at`, `read_by_journalist_id`, `credibility_at_submission`. Removed: `content`, `ai_summary`, `zetic_classification`. `classification_source` enum: `'edge_ai' | 'asi1_meta' | 'manual'`. Attachments live in a separate collection keyed by `tip_id` — no embedded array on Tip.
 - **Journalist model adds:** `public_key`, `public_key_fingerprint`, `key_uploaded_at`. Seed script seeds journalists *without* keys; they generate one on first dashboard login.
-- **Next.js version is 16.2.4.**
+- **Next.js version is 16.2.4** — runs with **webpack** (not Turbopack). Next.js 16 defaults to Turbopack, which breaks `@xenova/transformers` browser stubs. Scripts use `--webpack` flag explicitly. Do not add `turbopack: {}` to `next.config.ts`.
 - **Seed script:** `npm run seed` — seeds 4 journalists. Requires `dotenv` (dev dep) because `tsx` does not load `.env.local` automatically.
 - **Python agent ports:** FastAPI (`/triage`) on **port 8000**, uAgents on **port 8001**. Both start from `python main.py`. The `/triage` schema is now metadata-only (`MetadataPayload` in `agents/main.py`).
-- **Python 3.13 + aiohttp mailbox bug:** `uagents` mailbox connection throws a brotli decompression error on Python 3.13. Does not affect `/triage` endpoint. Use 3.11/3.12 if Agentverse mailbox is needed.
+- **Python version for agent:** Use 3.12 (`lantern` conda env). Python 3.13 has an aiohttp/brotli decompression bug that breaks the Agentverse mailbox connection. Does not affect the `/triage` FastAPI endpoint.
+- **uAgents version:** Pin to `>=0.24.2`. Earlier 0.22.x builds a `RegistrationRequest` without the required `name` field added in `uagents-core` 0.4.x, causing a `ValidationError` on Agentverse registration. `uagents-ai-engine` is not used and must not be installed (it pins `uagents<0.23.0`).
+- **MongoDB default DB:** If `MONGODB_URI` has no database path, Mongoose defaults to `test`. The Python agent uses `get_default_database()` with a `'test'` fallback in `agents/db.py` to match this.
+- **AGENT_MAILBOX env var:** Set to `false` (or `0`/`no`/`off`) to start the uAgent without the Agentverse mailbox — useful for local testing. Set to `true` (or omit) for full Agentverse connectivity.
+
+---
+
+## Known Bug Fixes (preserve for future sessions)
+
+### 1. `@xenova/transformers` — "Cannot convert undefined or null to object"
+**Symptom:** Browser throws this error when the submission form tries to run edge AI after World ID verification.
+**Root cause:** `@xenova/transformers/src/env.js` calls `Object.keys(fs)` at module level. Turbopack resolves `"browser": { "fs": false }` as a true empty ES module — so `import fs from 'fs'` returns `undefined`. Webpack's CJS interop gives `{}` instead, which is safe.
+**Fix:**
+- `next.config.ts`: use webpack `resolve.fallback` (`fs/path/url/crypto/stream/buffer: false`) + `asyncWebAssembly: true`. No `turbopack: {}`.
+- `package.json`: add `--webpack` to `dev`, `build`, `start` scripts.
+- `lib/edge-ai/runtime.ts`: set `env.backends.onnx.wasm.wasmPaths = '/ort-wasm/'`.
+- `public/ort-wasm/`: copy WASM files from `onnxruntime-web/dist/` so they are served as static assets.
+
+### 2. `@xenova/transformers` — SSR crash during server render
+**Symptom:** Same error but on the server at build/render time.
+**Fix:**
+- All `import { pipeline } from '@xenova/transformers'` changed to `await import('@xenova/transformers')` inside async functions in `lib/edge-ai/*.ts`.
+- `TipSubmissionForm` wrapped in `next/dynamic(..., { ssr: false })` in `app/submit/page.tsx`.
+
+### 3. uAgents — `ValidationError: RegistrationRequest name field required`
+**Symptom:** Agent starts but throws when trying to connect to the Agentverse mailbox or inspector.
+**Root cause:** `uagents` 0.22.x builds `RegistrationRequest` without `name`, but `uagents-core` 0.4.x added `name` as required. `uagents` 0.24.x was updated to pass `name=self.name`.
+**Fix:** `agents/requirements.txt` pins `uagents>=0.24.2`. Remove `uagents-ai-engine` (incompatible with 0.24.x and unused). Run `pip install "uagents==0.24.2"` in the `lantern` conda env.
+
+### 4. Python agent — wrong MongoDB database
+**Symptom:** Agent finds no journalists even though the DB has data.
+**Root cause:** `MONGODB_URI` without a DB path makes Mongoose default to `test`, but the Python agent was connecting without specifying a DB.
+**Fix:** `agents/db.py` uses `client.get_default_database()` with `'test'` as the fallback. Imported in `journalist_store.py` and `triage_agent.py`.
+
+### 5. Next.js build — "Using Turbopack with a webpack config"
+**Symptom:** `next build` fails when `turbopack: {}` and a `webpack: (config) => {}` function are both present in `next.config.ts`.
+**Fix:** Never set both at once. Use webpack config only (no `turbopack: {}`), and add `--webpack` to npm scripts.
 
 ---
 
@@ -122,7 +172,7 @@ PUBLIC PAGES
 lantern/
 ├── app/
 │   ├── page.tsx                                ← Landing
-│   ├── submit/page.tsx                         ← Tip submission
+│   ├── submit/page.tsx                         ← Tip submission (ssr: false)
 │   ├── status/page.tsx                         ← Tipper status check
 │   ├── transparency/page.tsx                   ← Public pubkey list
 │   ├── journalist/
@@ -132,10 +182,13 @@ lantern/
 │   ├── admin/review/page.tsx                   ← Metadata-only review queue
 │   └── api/
 │       ├── tips/
-│       │   ├── metadata/route.ts               ← POST: step 1 (metadata)
+│       │   ├── metadata/route.ts               ← POST: step 1 (metadata + preferences)
 │       │   └── [id]/
-│       │       ├── route.ts                    ← GET (per-journalist ciphertext)
-│       │       ├── ciphertext/route.ts         ← POST: step 2 (ciphertext)
+│       │       ├── route.ts                    ← GET (per-journalist ciphertext + attachments)
+│       │       ├── ciphertext/route.ts         ← POST: step 2 (ciphertext) + tip_count++
+│       │       ├── attachment/
+│       │       │   ├── route.ts                ← POST: multipart upload (encrypted file)
+│       │       │   └── [aid]/route.ts          ← GET: binary ciphertext download
 │       │       ├── status/route.ts             ← GET: public status
 │       │       ├── rate/route.ts               ← PATCH: rate
 │       │       └── read/route.ts               ← POST: mark read
@@ -170,28 +223,38 @@ lantern/
 │   ├── triage.ts                               ← Server-side fallback rules
 │   ├── credibility.ts                          ← Score helpers
 │   ├── crypto/
-│   │   ├── keypair.ts                          ← TweetNaCl box helpers
+│   │   ├── keypair.ts                          ← TweetNaCl box helpers (tip body)
+│   │   ├── file.ts                             ← Hybrid envelope encryption for attachments
 │   │   ├── passphrase.ts                       ← PBKDF2 + secretbox
 │   │   ├── keystore.ts                         ← IndexedDB wrapper
 │   │   └── fingerprint.ts                      ← SHA-256 fingerprint
 │   ├── edge-ai/
-│   │   ├── runtime.ts                          ← WebGPU detection + env config
+│   │   ├── runtime.ts                          ← WebGPU detection + env config + wasmPaths
 │   │   ├── classify.ts                         ← Zero-shot pipeline
 │   │   └── quality.ts                          ← Embedder + heuristic metadata
 │   ├── journalist/
 │   │   └── session.tsx                         ← React Context for unlocked key
 │   └── models/
 │       ├── Tip.ts
+│       ├── Attachment.ts
 │       ├── Journalist.ts
 │       ├── NullifierLog.ts
-│       └── Credibility.ts                      ← New
+│       └── Credibility.ts
 │
 ├── agents/                                     ← Python Fetch.ai agent
 │   ├── main.py                                 ← FastAPI on :8000 + uAgents on :8001
 │   ├── triage_agent.py                         ← Metadata-only triage
 │   ├── gemma_client.py                         ← ASI:One on metadata (decide_priority)
 │   ├── journalist_store.py                     ← Returns journalists with pubkeys
+│   ├── db.py                                   ← get_db() with test-DB fallback
 │   └── requirements.txt
+│
+├── public/
+│   └── ort-wasm/                               ← WASM files served as static assets
+│       ├── ort-wasm.wasm
+│       ├── ort-wasm-simd.wasm
+│       ├── ort-wasm-threaded.wasm
+│       └── ort-wasm-simd-threaded.wasm
 │
 └── scripts/
     └── seed-journalists.ts
@@ -227,6 +290,7 @@ MONGODB_URI=
 ASI1_API_KEY=
 AGENTVERSE_API_KEY=
 AGENT_SEED=<random hex — run: python3 -c "import secrets; print(secrets.token_hex(32))">
+AGENT_MAILBOX=true   # set to false to skip Agentverse mailbox for local testing
 ```
 
 ---
@@ -245,6 +309,7 @@ export interface ITip {
     structural_quality,
     entity_count, date_count, money_mentions,
   };
+  preferences?: { category?, organization?, journalist_id? };  // tipper-pinned routing
   ciphertexts: { journalist_id, ciphertext, nonce, ephemeral_pubkey }[];
   verified_human: boolean;
   priority: 'high' | 'standard';
@@ -254,6 +319,24 @@ export interface ITip {
   assigned_journalist_id?, read_at?, read_by_journalist_id?;
   credibility_at_submission?: number;
   created_at, updated_at;
+}
+```
+
+### `Attachment` (MongoDB)
+
+```typescript
+export interface IAttachment {
+  tip_id: string;                   // ref to Tip._id
+  file_ciphertext: Buffer;          // secretbox(file_bytes, file_nonce, content_key)
+  file_nonce: string;
+  filename_ciphertext: string;      // secretbox(filename, filename_nonce, content_key)
+  filename_nonce: string;
+  mime_type: string;
+  file_size: number;
+  wrapped_keys: {                   // one per recipient: box-wrapped content key
+    journalist_id, key_ciphertext, key_nonce, ephemeral_pubkey
+  }[];
+  created_at: Date;
 }
 ```
 
@@ -286,9 +369,11 @@ export interface ICredibility {
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/api/tips/metadata` | POST | Step 1: persist metadata, get recipient pubkeys |
-| `/api/tips/[id]/ciphertext` | POST | Step 2: attach ciphertexts |
-| `/api/tips/[id]` | GET | Per-journalist ciphertext + metadata (auth required) |
+| `/api/tips/metadata` | POST | Step 1: persist metadata + optional preferences, get recipient pubkeys |
+| `/api/tips/[id]/ciphertext` | POST | Step 2: attach ciphertexts; increments assigned journalist's `tip_count` |
+| `/api/tips/[id]/attachment` | POST | Multipart upload of one encrypted attachment (only while `awaiting_ciphertext`) |
+| `/api/tips/[id]/attachment/[aid]` | GET | Binary ciphertext download; gated by recipient set + `Bearer demo-token` |
+| `/api/tips/[id]` | GET | Per-journalist ciphertext + metadata + attachment list (filtered to this journalist's wrapped key) |
 | `/api/tips/[id]/status` | GET | Public status (no journalist identity) |
 | `/api/tips/[id]/rate` | PATCH | Journalist rates tip (valuable/dismissed) |
 | `/api/tips/[id]/read` | POST | Journalist marks tip read |
@@ -314,9 +399,11 @@ export interface ICredibility {
 8. ✅ Two-pass tip submission — `/api/tips/metadata` + `/api/tips/[id]/ciphertext`
 9. ✅ Frontend — submission form (4 steps with edge AI + encryption)
 10. ✅ Journalist dashboard — keypair gate (setup / unlock / restore) + decryption
-11. ✅ Admin review queue — metadata only; reassign within recipient set
+11. ✅ Admin review queue — metadata only; reassign within recipient set (now mostly empty since `human_review` only fires on zero recipients)
 12. ✅ Public pages — `/transparency` + `/status`
-13. ⬜ Figma Make — document design process
+13. ✅ Tipper routing preferences — optional category/newsgroup/journalist on submit
+14. ✅ Encrypted attachments — hybrid envelope encryption; per-recipient wrapped content keys
+15. ⬜ Figma Make — document design process
 
 ---
 
@@ -331,13 +418,20 @@ export interface ICredibility {
 - [ ] Network tab confirms NO field named `content` ever leaves the browser
 - [ ] MongoDB inspection: `tips.content` does not exist; `tips.ciphertexts[].ciphertext` is opaque
 - [ ] Submit 4 tips with same nullifier → 4th returns 429
-- [ ] Vague tip → confidence < 0.55 → `status: human_review`
+- [ ] Tip with non-empty recipient pool → `status: routed` regardless of confidence; assigned journalist's `tip_count` increments by 1
+- [ ] Tip with preferences pinning an inactive/keyless journalist → recipients=0 → `status: human_review` (lands on admin queue, never on a journalist dashboard)
+- [ ] Tipper picks a specific journalist preference → only that journalist appears in `tip.ciphertexts` and receives the tip
+- [ ] Tipper picks newsgroup only → recipients are restricted to journalists in that organization
 - [ ] Journalist dashboard lists metadata; click → tip decrypts in-browser; `read_at` is set
 - [ ] `/status?tip_id=...` shows `routed` + `read` after step above
 - [ ] Journalist rates tip `valuable` → `Credibility` score increases for that nullifier
 - [ ] Second tip from same nullifier shows boosted `credibility_at_submission`
 - [ ] Non-recipient journalist GET `/api/tips/{id}?journalist_id=other` → 403
 - [ ] Admin reassignment is rejected if target journalist isn't in `tip.ciphertexts`
+- [ ] Submit tip with attachment → file ciphertext stored in `attachments` collection; original filename never appears in DB; recipient journalist sees decrypted filename + can download + decrypt
+- [ ] Non-recipient journalist GET `/api/tips/{id}/attachment/{aid}?journalist_id=other` → 403
+- [ ] Attachment > 10MB rejected with 413; > 5 attachments per tip rejected with 409
+- [ ] POST attachment after tip moves out of `awaiting_ciphertext` → 409
 - [ ] Fetch.ai Chat Protocol responds to "review queue", "routed tips", "total tips"
 - [ ] Agent visible on Agentverse
 
@@ -349,9 +443,14 @@ export interface ICredibility {
 - **Journalist auth:** `Authorization: Bearer demo-token` for demo
 - **World ID staging:** Set `NEXT_PUBLIC_WLD_ENVIRONMENT=staging` for World App simulator
 - **ASI:One rate limits:** If Fetch.ai latency is high, check API key quota at asi1.ai
-- **Agent hosting:** Run locally. `ngrok http 8001` exposes uAgents for Agentverse. Next.js → agent uses `AGENT_ENDPOINT=http://localhost:8000/triage`
-- **Python version:** Use 3.11 or 3.12 (3.13 has an aiohttp/brotli bug for the Agentverse mailbox)
-- **Forgotten passphrase:** No recovery exists. Users must keep their `.json` backup. This is an explicit design choice.
+- **Agent hosting:** Run locally with `conda activate lantern && cd agents && python main.py`. `ngrok http 8001` exposes uAgents for Agentverse. Next.js → agent uses `AGENT_ENDPOINT=http://localhost:8000/triage`
+- **Python version:** Use the `lantern` conda env (Python 3.12). Python 3.13 has an aiohttp/brotli decompression bug for the Agentverse mailbox.
+- **uAgents conda env:** `conda activate lantern` — has Python 3.12.13 and uagents 0.24.2. Do not use base env (Python 3.13).
+- **Forgotten passphrase:** No recovery exists. Users must keep their `.json` backup. This is an explicit design choice. (Includes attachments — losing the secret key means losing the wrapped content keys for every received attachment.)
+- **Attachment size cap:** 10MB per file, 5 files per tip. Hard-coded in `app/api/tips/[id]/attachment/route.ts` and mirrored in `components/TipSubmissionForm.tsx`. Larger files need GridFS — current path stores the binary in a `Buffer` field bounded by Mongo's 16MB document limit.
+- **Routing preference leakage:** `Tip.preferences` is stored on the server in cleartext. The tip body and any files stay E2EE, but the *fact that a tipper picked Journalist X or Newsgroup Y* is server-visible metadata. The submission UI states this. If stronger anonymity is required for a particular flow, filter the recipient pool client-side before encrypting and don't send `preferences`.
+- **WASM files:** `public/ort-wasm/*.wasm` are copied from `onnxruntime-web/dist/`. If you reinstall `onnxruntime-web`, re-copy them: `cp node_modules/onnxruntime-web/dist/*.wasm public/ort-wasm/`
+- **Webpack vs Turbopack:** Always run with `--webpack`. Next.js 16 defaults to Turbopack which breaks `@xenova/transformers` browser stubs. The `--webpack` flag is baked into `package.json` scripts.
 
 ---
 
