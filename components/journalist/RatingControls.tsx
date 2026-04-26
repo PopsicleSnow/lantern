@@ -45,7 +45,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
           padding: '1rem',
           border: '1px solid var(--border)',
           backgroundColor: 'var(--surface)',
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.78rem',
           color: 'var(--text-secondary)',
         }}
@@ -70,7 +70,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
     >
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.72rem',
           color: 'var(--text-secondary)',
           marginBottom: '0.75rem',
@@ -82,7 +82,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
       </p>
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           color: 'var(--text-secondary)',
           marginBottom: '0.75rem',
@@ -102,7 +102,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
             border: '1px solid var(--success)',
             color: 'var(--success)',
             padding: '0.6rem',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.78rem',
             cursor: busy ? 'not-allowed' : 'pointer',
             letterSpacing: '0.05em',
@@ -119,7 +119,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
             border: '1px solid var(--warning)',
             color: 'var(--warning)',
             padding: '0.6rem',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.78rem',
             cursor: busy ? 'not-allowed' : 'pointer',
             letterSpacing: '0.05em',
@@ -132,7 +132,7 @@ export default function RatingControls({ tip_id, journalist_id, onRated }: Props
         <p
           style={{
             color: 'var(--warning)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.7rem',
             marginTop: '0.6rem',
           }}

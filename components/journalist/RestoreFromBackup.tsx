@@ -72,7 +72,7 @@ export default function RestoreFromBackup({
     <div style={{ maxWidth: '480px', width: '100%' }}>
       <div
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           color: 'var(--accent)',
           letterSpacing: '0.15em',
@@ -84,7 +84,7 @@ export default function RestoreFromBackup({
       </div>
       <h1
         style={{
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Libre Baskerville', serif",
           fontSize: '1.4rem',
           color: 'var(--text-primary)',
           marginBottom: '0.5rem',
@@ -100,7 +100,7 @@ export default function RestoreFromBackup({
           marginBottom: '1.5rem',
         }}
       >
-        Upload your <code>lantern-key-*.json</code> backup file and choose a new passphrase for this
+        Upload your <code>iceberg-key-*.json</code> backup file and choose a new passphrase for this
         device.
       </p>
 
@@ -117,7 +117,7 @@ export default function RestoreFromBackup({
       >
         <p
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.78rem',
             color: file ? 'var(--accent)' : 'var(--text-secondary)',
           }}
@@ -144,7 +144,7 @@ export default function RestoreFromBackup({
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
           color: 'var(--text-primary)',
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.9rem',
           padding: '0.65rem 0.9rem',
           outline: 'none',
@@ -162,7 +162,7 @@ export default function RestoreFromBackup({
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
           color: 'var(--text-primary)',
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.9rem',
           padding: '0.65rem 0.9rem',
           outline: 'none',
@@ -174,7 +174,7 @@ export default function RestoreFromBackup({
         <p
           style={{
             color: 'var(--warning)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.78rem',
             marginBottom: '0.75rem',
           }}
@@ -189,10 +189,10 @@ export default function RestoreFromBackup({
         style={{
           width: '100%',
           backgroundColor: 'var(--accent)',
-          color: '#0a0a0a',
+          color: 'var(--bg)',
           border: 'none',
           padding: '0.75rem',
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
           fontWeight: 600,
           fontSize: '0.9rem',
           cursor: !valid || busy ? 'not-allowed' : 'pointer',

@@ -64,7 +64,7 @@ function StatusInner() {
         <Link
           href="/"
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.75rem',
             color: 'var(--accent)',
             textDecoration: 'none',
@@ -76,7 +76,7 @@ function StatusInner() {
         <span style={{ color: 'var(--border)' }}>|</span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
@@ -90,7 +90,7 @@ function StatusInner() {
       <div style={{ maxWidth: '520px', margin: '0 auto', padding: '3rem 2rem' }}>
         <h1
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Libre Baskerville', serif",
             fontSize: '1.75rem',
             color: 'var(--text-primary)',
             marginBottom: '0.75rem',
@@ -120,7 +120,7 @@ function StatusInner() {
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.85rem',
             padding: '0.75rem 1rem',
             marginBottom: '0.75rem',
@@ -133,10 +133,10 @@ function StatusInner() {
           style={{
             width: '100%',
             backgroundColor: 'var(--accent)',
-            color: '#0a0a0a',
+            color: 'var(--bg)',
             border: 'none',
             padding: '0.7rem',
-            fontFamily: "'IBM Plex Sans', sans-serif",
+            fontFamily: "'Source Sans 3', sans-serif",
             fontWeight: 600,
             fontSize: '0.9rem',
             cursor: !tipId || loading ? 'not-allowed' : 'pointer',
@@ -150,7 +150,7 @@ function StatusInner() {
           <p
             style={{
               color: 'var(--warning)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.85rem',
               marginTop: '1rem',
             }}
@@ -170,7 +170,7 @@ function StatusInner() {
           >
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color: 'var(--text-secondary)',
                 letterSpacing: '0.1em',
@@ -182,7 +182,7 @@ function StatusInner() {
             </div>
             <div
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.5rem',
                 color: 'var(--accent)',
                 marginBottom: '1rem',
@@ -196,7 +196,7 @@ function StatusInner() {
                 display: 'grid',
                 gridTemplateColumns: '120px 1fr',
                 gap: '0.5rem 1rem',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.78rem',
                 color: 'var(--text-secondary)',
               }}
@@ -225,7 +225,7 @@ function StatusInner() {
             <p
               style={{
                 marginTop: '1.5rem',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color: 'var(--text-secondary)',
                 lineHeight: 1.6,

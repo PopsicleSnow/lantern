@@ -159,22 +159,9 @@ export default function JournalistDashboard() {
         backgroundColor: 'var(--surface)',
       }}
     >
-      <Link
-        href="/"
-        style={{
-          fontFamily: "'IBM Plex Mono', monospace",
-          fontSize: '0.75rem',
-          color: 'var(--accent)',
-          textDecoration: 'none',
-          letterSpacing: '0.2em',
-        }}
-      >
-        LANTERN
-      </Link>
-      <span style={{ color: 'var(--border)' }}>|</span>
       <span
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.72rem',
           color: 'var(--text-secondary)',
           textTransform: 'uppercase',
@@ -183,11 +170,13 @@ export default function JournalistDashboard() {
       >
         Journalist Dashboard
       </span>
+
+
       <Link
         href="/transparency"
         style={{
           marginLeft: 'auto',
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           color: 'var(--text-secondary)',
           textDecoration: 'underline',
@@ -215,7 +204,7 @@ export default function JournalistDashboard() {
             <p
               style={{
                 color: 'var(--text-secondary)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.85rem',
               }}
             >
@@ -225,7 +214,7 @@ export default function JournalistDashboard() {
             <div style={{ maxWidth: '400px', width: '100%' }}>
               <h1
                 style={{
-                  fontFamily: "'Playfair Display', serif",
+                  fontFamily: "'Libre Baskerville', serif",
                   fontSize: '1.5rem',
                   color: 'var(--text-primary)',
                   marginBottom: '0.5rem',
@@ -246,7 +235,7 @@ export default function JournalistDashboard() {
                   backgroundColor: 'var(--surface)',
                   border: '1px solid var(--border)',
                   color: 'var(--text-primary)',
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.85rem',
                   padding: '0.75rem 1rem',
                   marginBottom: '1rem',
@@ -257,7 +246,7 @@ export default function JournalistDashboard() {
                 <p
                   style={{
                     color: 'var(--warning)',
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.78rem',
                     marginBottom: '0.75rem',
                   }}
@@ -271,10 +260,10 @@ export default function JournalistDashboard() {
                 style={{
                   width: '100%',
                   backgroundColor: 'var(--accent)',
-                  color: '#0a0a0a',
+                  color: 'var(--bg)',
                   border: 'none',
                   padding: '0.75rem',
-                  fontFamily: "'IBM Plex Sans', sans-serif",
+                  fontFamily: "'Source Sans 3', sans-serif",
                   fontWeight: 600,
                   fontSize: '0.9rem',
                   cursor: !inputId.trim() ? 'not-allowed' : 'pointer',
@@ -369,7 +358,7 @@ export default function JournalistDashboard() {
           <div>
             <h1
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.5rem',
                 color: 'var(--text-primary)',
                 marginBottom: '0.25rem',
@@ -379,7 +368,7 @@ export default function JournalistDashboard() {
             </h1>
             <p
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.72rem',
                 color: 'var(--text-secondary)',
               }}
@@ -394,7 +383,7 @@ export default function JournalistDashboard() {
               backgroundColor: 'transparent',
               border: '1px solid var(--border)',
               color: 'var(--text-secondary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.72rem',
               padding: '0.4rem 0.75rem',
               cursor: 'pointer',
@@ -408,7 +397,7 @@ export default function JournalistDashboard() {
           <p
             style={{
               color: 'var(--text-secondary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.85rem',
             }}
           >
@@ -420,7 +409,7 @@ export default function JournalistDashboard() {
           <p
             style={{
               color: 'var(--text-secondary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.85rem',
             }}
           >

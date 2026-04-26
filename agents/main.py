@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
 from triage_agent import (
-    lantern_agent,
+    iceberg_agent,
     TipMetadata,
     TipPreferences,
     TriagePayload,
@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Lantern Triage Agent")
+app = FastAPI(title="Iceberg Triage Agent")
 
 
 class MetadataPayload(BaseModel):
@@ -65,11 +65,11 @@ async def receive_tip(req: TriageRequest):
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "agent": lantern_agent.name}
+    return {"status": "ok", "agent": iceberg_agent.name}
 
 
 def run_agent():
-    lantern_agent.run()
+    iceberg_agent.run()
 
 
 if __name__ == "__main__":

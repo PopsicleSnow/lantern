@@ -41,7 +41,7 @@ export default function WorldIDButton({ onSuccess, onError }: WorldIDButtonProps
           border: '1px solid var(--accent)',
           color: 'var(--accent)',
           padding: '1rem 2.5rem',
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
           fontWeight: 500,
           fontSize: '1rem',
           cursor: 'pointer',

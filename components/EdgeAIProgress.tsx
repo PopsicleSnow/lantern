@@ -23,7 +23,7 @@ export default function EdgeAIProgress({ stage, detail, progress }: EdgeAIProgre
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.85rem',
           color: 'var(--accent)',
           letterSpacing: '0.08em',
@@ -36,7 +36,7 @@ export default function EdgeAIProgress({ stage, detail, progress }: EdgeAIProgre
       {detail && (
         <p
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             marginBottom: '0.5rem',
@@ -67,7 +67,7 @@ export default function EdgeAIProgress({ stage, detail, progress }: EdgeAIProgre
       )}
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.65rem',
           color: 'var(--text-secondary)',
           marginTop: '1.5rem',

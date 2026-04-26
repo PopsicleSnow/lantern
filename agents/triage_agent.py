@@ -56,10 +56,10 @@ def _preferences_dict(p: Optional[TipPreferences]) -> dict:
 _mailbox_env = os.getenv("AGENT_MAILBOX", "true").lower()
 _mailbox_enabled = _mailbox_env not in ("false", "0", "no", "off")
 
-lantern_agent = Agent(
-    name="lantern_triage",
+iceberg_agent = Agent(
+    name="iceberg_triage",
     network="testnet",
-    seed=os.getenv("AGENT_SEED", "lantern_secret_seed_change_this"),
+    seed=os.getenv("AGENT_SEED", "iceberg_secret_seed_change_this"),
     mailbox=_mailbox_enabled,
     port=8001,
 )
@@ -153,10 +153,10 @@ async def handle_chat(ctx: Context, sender: str, msg: ChatMessage):
         response = _text_reply(f"{count} tips have been routed to journalists.")
     elif 'total' in text or 'how many' in text:
         total = db.tips.count_documents({})
-        response = _text_reply(f"Lantern has received {total} tips in total.")
+        response = _text_reply(f"Iceberg has received {total} tips in total.")
     else:
         response = _text_reply(
-            "Lantern Triage Agent. I route encrypted whistleblower tips to verified "
+            "Iceberg Triage Agent. I route encrypted whistleblower tips to verified "
             "journalists using metadata only — I never see tip content. "
             "Try: 'review queue', 'routed tips', 'total tips'."
         )
@@ -169,4 +169,4 @@ async def handle_ack(ctx: Context, sender: str, msg: ChatAcknowledgement):
     pass
 
 
-lantern_agent.include(chat_proto)
+iceberg_agent.include(chat_proto)

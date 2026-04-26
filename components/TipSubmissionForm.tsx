@@ -295,17 +295,17 @@ export default function TipSubmissionForm() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color:
-                  i < stepIndex ? '#0a0a0a' : i === stepIndex ? 'var(--accent)' : 'var(--text-secondary)',
+                  i < stepIndex ? 'var(--bg)' : i === stepIndex ? 'var(--accent)' : 'var(--text-secondary)',
               }}
             >
               {i < stepIndex ? '✓' : i + 1}
             </div>
             <span
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.72rem',
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase',
@@ -332,7 +332,7 @@ export default function TipSubmissionForm() {
           <div>
             <h1
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.75rem',
                 color: 'var(--text-primary)',
                 marginBottom: '0.5rem',
@@ -356,7 +356,7 @@ export default function TipSubmissionForm() {
                 fontSize: '0.78rem',
                 marginBottom: '1.5rem',
                 lineHeight: 1.6,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
               }}
             >
               Your text is classified and encrypted in this browser before anything leaves your device.
@@ -389,7 +389,7 @@ export default function TipSubmissionForm() {
               >
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.72rem',
                     letterSpacing: '0.08em',
                     textTransform: 'uppercase',
@@ -404,7 +404,7 @@ export default function TipSubmissionForm() {
                     color: 'var(--text-secondary)',
                     fontSize: '0.72rem',
                     lineHeight: 1.5,
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     marginTop: 0,
                     marginBottom: '0.6rem',
                   }}
@@ -419,10 +419,10 @@ export default function TipSubmissionForm() {
                     width: '100%',
                     textAlign: 'center',
                     backgroundColor: 'var(--accent)',
-                    color: '#0a0a0a',
+                    color: 'var(--bg)',
                     border: '1px solid var(--accent)',
                     padding: '0.5rem 0.6rem',
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.72rem',
                     letterSpacing: '0.04em',
                     textTransform: 'uppercase',
@@ -464,7 +464,7 @@ export default function TipSubmissionForm() {
                       color: 'var(--text-secondary)',
                       opacity: 0.8,
                       fontSize: '0.68rem',
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       margin: 0,
                     }}
                   >
@@ -489,7 +489,7 @@ export default function TipSubmissionForm() {
                           gap: '0.35rem',
                           border: '1px solid var(--border)',
                           padding: '0.45rem 0.5rem',
-                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontFamily: "'Source Code Pro', monospace",
                           fontSize: '0.7rem',
                           color: 'var(--text-secondary)',
                         }}
@@ -506,7 +506,7 @@ export default function TipSubmissionForm() {
                               background: 'transparent',
                               border: '1px solid var(--border)',
                               color: 'var(--text-secondary)',
-                              fontFamily: "'IBM Plex Mono', monospace",
+                              fontFamily: "'Source Code Pro', monospace",
                               fontSize: '0.65rem',
                               padding: '0.15rem 0.4rem',
                               cursor: 'pointer',
@@ -523,7 +523,7 @@ export default function TipSubmissionForm() {
                   <p
                     style={{
                       color: 'var(--warning)',
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.72rem',
                       marginTop: '0.5rem',
                     }}
@@ -549,7 +549,7 @@ export default function TipSubmissionForm() {
                     backgroundColor: 'var(--surface)',
                     border: '1px solid var(--border)',
                     color: 'var(--text-primary)',
-                    fontFamily: "'IBM Plex Sans', sans-serif",
+                    fontFamily: "'Source Sans 3', sans-serif",
                     fontSize: '0.95rem',
                     padding: '1rem',
                     lineHeight: 1.7,
@@ -568,7 +568,7 @@ export default function TipSubmissionForm() {
                 >
                   <span
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.75rem',
                       color: content.length > 4500 ? 'var(--warning)' : 'var(--text-secondary)',
                     }}
@@ -580,10 +580,10 @@ export default function TipSubmissionForm() {
                     disabled={content.trim().length < 10}
                     style={{
                       backgroundColor: 'var(--accent)',
-                      color: '#0a0a0a',
+                      color: 'var(--bg)',
                       border: 'none',
                       padding: '0.75rem 2rem',
-                      fontFamily: "'IBM Plex Sans', sans-serif",
+                      fontFamily: "'Source Sans 3', sans-serif",
                       fontWeight: 600,
                       fontSize: '0.95rem',
                       cursor: content.trim().length < 10 ? 'not-allowed' : 'pointer',
@@ -604,7 +604,7 @@ export default function TipSubmissionForm() {
                   background: 'transparent',
                   border: 'none',
                   color: 'var(--text-secondary)',
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.78rem',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
@@ -622,7 +622,7 @@ export default function TipSubmissionForm() {
                       color: 'var(--text-secondary)',
                       fontSize: '0.78rem',
                       lineHeight: 1.6,
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       margin: 0,
                     }}
                   >
@@ -690,7 +690,7 @@ export default function TipSubmissionForm() {
                         background: 'transparent',
                         border: '1px solid var(--border)',
                         color: 'var(--text-secondary)',
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontFamily: "'Source Code Pro', monospace",
                         fontSize: '0.72rem',
                         padding: '0.4rem 0.75rem',
                         cursor: 'pointer',
@@ -710,7 +710,7 @@ export default function TipSubmissionForm() {
           <div style={{ textAlign: 'center' }}>
             <h1
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.75rem',
                 color: 'var(--text-primary)',
                 marginBottom: '0.75rem',
@@ -741,7 +741,7 @@ export default function TipSubmissionForm() {
                 backgroundColor: 'transparent',
                 border: 'none',
                 color: 'var(--text-secondary)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.75rem',
                 cursor: 'pointer',
                 textDecoration: 'underline',
@@ -768,7 +768,7 @@ export default function TipSubmissionForm() {
           <div style={{ textAlign: 'center' }}>
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color: 'var(--accent)',
                 letterSpacing: '0.15em',
@@ -780,7 +780,7 @@ export default function TipSubmissionForm() {
             </div>
             <h1
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.75rem',
                 color: 'var(--text-primary)',
                 marginBottom: '1rem',
@@ -812,7 +812,7 @@ export default function TipSubmissionForm() {
             >
               <span
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '1.2rem',
                   fontWeight: 500,
                   color: 'var(--accent)',
@@ -828,7 +828,7 @@ export default function TipSubmissionForm() {
                   backgroundColor: 'transparent',
                   border: '1px solid var(--border)',
                   color: 'var(--text-secondary)',
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.72rem',
                   padding: '0.4rem 0.75rem',
                   cursor: 'pointer',
@@ -845,7 +845,7 @@ export default function TipSubmissionForm() {
                 href={`/status?tip_id=${tipId}`}
                 style={{
                   display: 'inline-block',
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.78rem',
                   color: 'var(--accent)',
                   textDecoration: 'underline',
@@ -863,7 +863,7 @@ export default function TipSubmissionForm() {
             <p
               style={{
                 color: 'var(--warning)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 marginBottom: '1.5rem',
               }}
             >
@@ -878,7 +878,7 @@ export default function TipSubmissionForm() {
                 backgroundColor: 'transparent',
                 border: '1px solid var(--border)',
                 color: 'var(--text-secondary)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.85rem',
                 padding: '0.6rem 1.25rem',
                 cursor: 'pointer',
@@ -908,7 +908,7 @@ function PrefSelect({
     <label style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
       <span
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.72rem',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
@@ -924,7 +924,7 @@ function PrefSelect({
           backgroundColor: 'var(--surface)',
           border: '1px solid var(--border)',
           color: 'var(--text-primary)',
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
           fontSize: '0.9rem',
           padding: '0.6rem 0.75rem',
           outline: 'none',

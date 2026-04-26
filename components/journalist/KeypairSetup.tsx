@@ -64,7 +64,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
       );
       const a = document.createElement('a');
       a.href = blob_url;
-      a.download = `lantern-key-${journalist_id}.json`;
+      a.download = `iceberg-key-${journalist_id}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -82,7 +82,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
     <div style={{ maxWidth: '480px', width: '100%' }}>
       <div
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           color: 'var(--accent)',
           letterSpacing: '0.15em',
@@ -94,7 +94,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
       </div>
       <h1
         style={{
-          fontFamily: "'Playfair Display', serif",
+          fontFamily: "'Libre Baskerville', serif",
           fontSize: '1.5rem',
           color: 'var(--text-primary)',
           marginBottom: '0.75rem',
@@ -110,7 +110,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
           marginBottom: '1.5rem',
         }}
       >
-        Lantern uses end-to-end encryption. Your private key stays on this device — encrypted with a
+        Iceberg uses end-to-end encryption. Your private key stays on this device — encrypted with a
         passphrase you choose now. Tips are encrypted to your public key before they leave the
         source&apos;s browser. The server cannot read your tips.
       </p>
@@ -119,7 +119,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
         <label
           style={{
             display: 'block',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             marginBottom: '0.4rem',
@@ -139,7 +139,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.9rem',
             padding: '0.65rem 0.9rem',
             outline: 'none',
@@ -151,7 +151,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
         <label
           style={{
             display: 'block',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             marginBottom: '0.4rem',
@@ -171,7 +171,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
             backgroundColor: 'var(--surface)',
             border: '1px solid var(--border)',
             color: 'var(--text-primary)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.9rem',
             padding: '0.65rem 0.9rem',
             outline: 'none',
@@ -181,7 +181,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
           <p
             style={{
               color: 'var(--warning)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.7rem',
               marginTop: '0.4rem',
             }}
@@ -208,7 +208,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
         />
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.75rem',
             color: 'var(--text-secondary)',
             lineHeight: 1.5,
@@ -223,7 +223,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
         <p
           style={{
             color: 'var(--warning)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.78rem',
             marginBottom: '0.75rem',
           }}
@@ -238,10 +238,10 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
         style={{
           width: '100%',
           backgroundColor: 'var(--accent)',
-          color: '#0a0a0a',
+          color: 'var(--bg)',
           border: 'none',
           padding: '0.9rem',
-          fontFamily: "'IBM Plex Sans', sans-serif",
+          fontFamily: "'Source Sans 3', sans-serif",
           fontWeight: 600,
           fontSize: '0.95rem',
           cursor: !valid || busy ? 'not-allowed' : 'pointer',
@@ -253,7 +253,7 @@ export default function KeypairSetup({ journalist_id, journalist_name, onComplet
 
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           color: 'var(--text-secondary)',
           marginTop: '1rem',

@@ -224,7 +224,7 @@ export default function TipDetailPage() {
         <Link
           href="/"
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.75rem',
             color: 'var(--accent)',
             textDecoration: 'none',
@@ -237,7 +237,7 @@ export default function TipDetailPage() {
         <Link
           href="/journalist"
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             textDecoration: 'none',
@@ -254,7 +254,7 @@ export default function TipDetailPage() {
           <p
             style={{
               color: 'var(--text-secondary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
             }}
           >
             Decrypting...
@@ -265,7 +265,7 @@ export default function TipDetailPage() {
           <p
             style={{
               color: 'var(--warning)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.85rem',
             }}
           >
@@ -286,7 +286,7 @@ export default function TipDetailPage() {
             >
               <span
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.75rem',
                   color: 'var(--accent)',
                   textTransform: 'uppercase',
@@ -299,7 +299,7 @@ export default function TipDetailPage() {
               {tip.verified_human && (
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.7rem',
                     color: 'var(--success)',
                     border: '1px solid var(--success)',
@@ -312,7 +312,7 @@ export default function TipDetailPage() {
               {tip.credibility_at_submission !== null && (
                 <span
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.7rem',
                     color: 'var(--text-secondary)',
                     border: '1px solid var(--border)',
@@ -326,7 +326,7 @@ export default function TipDetailPage() {
 
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color: 'var(--text-secondary)',
                 marginBottom: '0.5rem',
@@ -342,7 +342,7 @@ export default function TipDetailPage() {
                 border: '1px solid var(--border)',
                 padding: '0.85rem 1rem',
                 marginBottom: '2rem',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.75rem',
                 color: 'var(--text-secondary)',
                 lineHeight: 1.7,
@@ -362,7 +362,7 @@ export default function TipDetailPage() {
 
             <div
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.7rem',
                 color: 'var(--text-secondary)',
                 marginBottom: '0.5rem',
@@ -378,7 +378,7 @@ export default function TipDetailPage() {
                 border: '1px solid var(--accent-dim)',
                 padding: '1.25rem 1.5rem',
                 marginBottom: '2rem',
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Source Sans 3', sans-serif",
                 fontSize: '0.95rem',
                 color: 'var(--text-primary)',
                 lineHeight: 1.7,
@@ -392,7 +392,7 @@ export default function TipDetailPage() {
               <>
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.7rem',
                     color: 'var(--text-secondary)',
                     marginBottom: '0.5rem',
@@ -421,7 +421,7 @@ export default function TipDetailPage() {
                         backgroundColor: 'var(--surface)',
                         border: '1px solid var(--border)',
                         padding: '0.65rem 0.85rem',
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontFamily: "'Source Code Pro', monospace",
                         fontSize: '0.8rem',
                         color: 'var(--text-secondary)',
                         gap: '1rem',
@@ -445,7 +445,7 @@ export default function TipDetailPage() {
                           background: 'transparent',
                           border: '1px solid var(--accent-dim)',
                           color: 'var(--accent)',
-                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontFamily: "'Source Code Pro', monospace",
                           fontSize: '0.72rem',
                           padding: '0.3rem 0.65rem',
                           cursor: downloadingId === a.id ? 'wait' : 'pointer',
@@ -462,7 +462,7 @@ export default function TipDetailPage() {
                   <p
                     style={{
                       color: 'var(--warning)',
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.78rem',
                       marginTop: '-1.25rem',
                       marginBottom: '2rem',
@@ -479,7 +479,7 @@ export default function TipDetailPage() {
                 display: 'flex',
                 gap: '1.5rem',
                 marginBottom: '2rem',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.72rem',
                 color: 'var(--text-secondary)',
               }}

@@ -65,14 +65,14 @@ export default function AdminReviewPage() {
       >
         <Link
           href="/"
-          style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.2em' }}
+          style={{ fontFamily: "'Source Code Pro', monospace", fontSize: '0.75rem', color: 'var(--accent)', textDecoration: 'none', letterSpacing: '0.12em' }}
         >
           LANTERN
         </Link>
         <span style={{ color: 'var(--border)' }}>|</span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
@@ -88,7 +88,7 @@ export default function AdminReviewPage() {
           <div>
             <h1
               style={{
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'Libre Baskerville', serif",
                 fontSize: '1.5rem',
                 color: 'var(--text-primary)',
                 marginBottom: '0.25rem',
@@ -96,18 +96,19 @@ export default function AdminReviewPage() {
             >
               Human Review Queue
             </h1>
-            <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
-              Tips with low classifier confidence — route or close.
+            <p style={{ fontFamily: "'Source Code Pro', monospace", fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
+              Tips with zero recipients - route or close.
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <span
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.72rem',
-                color: 'var(--accent)',
-                border: '1px solid var(--accent-dim)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border)',
                 padding: '0.3rem 0.75rem',
+                backgroundColor: '#fff',
               }}
             >
               {tips.length} PENDING
@@ -118,7 +119,7 @@ export default function AdminReviewPage() {
                 backgroundColor: 'transparent',
                 border: '1px solid var(--border)',
                 color: 'var(--text-secondary)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.72rem',
                 padding: '0.3rem 0.75rem',
                 cursor: 'pointer',
@@ -130,7 +131,7 @@ export default function AdminReviewPage() {
         </div>
 
         {loading ? (
-          <p style={{ color: 'var(--text-secondary)', fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.85rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontFamily: "'Source Code Pro', monospace", fontSize: '0.85rem' }}>
             Loading...
           </p>
         ) : (

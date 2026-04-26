@@ -26,7 +26,7 @@ export default function SecureDropPrompt({ url }: SecureDropPromptProps) {
     >
       <p
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
           fontSize: '0.7rem',
           letterSpacing: '0.1em',
           color: 'var(--accent)',
@@ -49,7 +49,7 @@ export default function SecureDropPrompt({ url }: SecureDropPromptProps) {
           rel="noopener noreferrer"
           style={{
             color: 'var(--accent)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.8rem',
             textDecoration: 'none',
             border: '1px solid var(--accent-dim)',
@@ -64,7 +64,7 @@ export default function SecureDropPrompt({ url }: SecureDropPromptProps) {
             backgroundColor: 'transparent',
             border: '1px solid var(--border)',
             color: 'var(--text-secondary)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.8rem',
             padding: '0.5rem 1rem',
             cursor: 'pointer',

@@ -43,7 +43,7 @@ export default function TransparencyPage() {
         <Link
           href="/"
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.75rem',
             color: 'var(--accent)',
             textDecoration: 'none',
@@ -55,7 +55,7 @@ export default function TransparencyPage() {
         <span style={{ color: 'var(--border)' }}>|</span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.72rem',
             color: 'var(--text-secondary)',
             textTransform: 'uppercase',
@@ -69,7 +69,7 @@ export default function TransparencyPage() {
       <div style={{ maxWidth: '860px', margin: '0 auto', padding: '3rem 2rem' }}>
         <h1
           style={{
-            fontFamily: "'Playfair Display', serif",
+            fontFamily: "'Libre Baskerville', serif",
             fontSize: '1.75rem',
             color: 'var(--text-primary)',
             marginBottom: '0.75rem',
@@ -85,7 +85,7 @@ export default function TransparencyPage() {
             marginBottom: '0.75rem',
           }}
         >
-          Tips submitted to Lantern are encrypted in your browser to one or more journalists below.
+          Tips submitted to Iceberg are encrypted in your browser to one or more journalists below.
           The server cannot read tips — only the journalist with the matching private key can.
         </p>
         <p
@@ -104,7 +104,7 @@ export default function TransparencyPage() {
           <p
             style={{
               color: 'var(--text-secondary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
             }}
           >
             Loading...
@@ -115,7 +115,7 @@ export default function TransparencyPage() {
           <p
             style={{
               color: 'var(--warning)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
             }}
           >
             {error}
@@ -143,7 +143,7 @@ export default function TransparencyPage() {
                 <div>
                   <div
                     style={{
-                      fontFamily: "'Playfair Display', serif",
+                      fontFamily: "'Libre Baskerville', serif",
                       fontSize: '1.1rem',
                       color: 'var(--text-primary)',
                       marginBottom: '0.2rem',
@@ -153,7 +153,7 @@ export default function TransparencyPage() {
                   </div>
                   <div
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.78rem',
                       color: 'var(--text-secondary)',
                     }}
@@ -164,7 +164,7 @@ export default function TransparencyPage() {
                 {j.verified && (
                   <span
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.65rem',
                       color: 'var(--success)',
                       border: '1px solid var(--success)',
@@ -189,7 +189,7 @@ export default function TransparencyPage() {
                   <span
                     key={beat}
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.65rem',
                       color: 'var(--text-secondary)',
                       border: '1px solid var(--border)',
@@ -205,7 +205,7 @@ export default function TransparencyPage() {
                 <>
                   <div
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.7rem',
                       color: 'var(--text-secondary)',
                       marginBottom: '0.3rem',
@@ -217,7 +217,7 @@ export default function TransparencyPage() {
                   </div>
                   <div
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.78rem',
                       color: 'var(--accent)',
                       wordBreak: 'break-all',
@@ -228,7 +228,7 @@ export default function TransparencyPage() {
                   </div>
                   <div
                     style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontFamily: "'Source Code Pro', monospace",
                       fontSize: '0.65rem',
                       color: 'var(--text-secondary)',
                       wordBreak: 'break-all',
@@ -239,7 +239,7 @@ export default function TransparencyPage() {
                   {j.key_uploaded_at && (
                     <div
                       style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontFamily: "'Source Code Pro', monospace",
                         fontSize: '0.65rem',
                         color: 'var(--text-secondary)',
                         marginTop: '0.5rem',
@@ -252,7 +252,7 @@ export default function TransparencyPage() {
               ) : (
                 <div
                   style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontFamily: "'Source Code Pro', monospace",
                     fontSize: '0.72rem',
                     color: 'var(--text-secondary)',
                     fontStyle: 'italic',

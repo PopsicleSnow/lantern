@@ -52,7 +52,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
       >
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.75rem',
             color: 'var(--accent)',
             textTransform: 'uppercase',
@@ -65,7 +65,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
           {tip.read_at && (
             <span
               style={{
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Source Code Pro', monospace",
                 fontSize: '0.65rem',
                 color: 'var(--text-secondary)',
                 letterSpacing: '0.05em',
@@ -84,7 +84,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
           fontSize: '0.78rem',
           lineHeight: 1.6,
           marginBottom: '0.75rem',
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'Source Code Pro', monospace",
         }}
       >
         {md.word_count ?? 0} words · confidence{' '}
@@ -101,7 +101,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.7rem',
             color: 'var(--text-secondary)',
           }}
@@ -114,7 +114,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
         </span>
         <span
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'Source Code Pro', monospace",
             fontSize: '0.7rem',
             color: 'var(--text-secondary)',
           }}
@@ -127,7 +127,7 @@ export default function TipCard({ tip, onClick }: TipCardProps) {
               <span
                 key={beat}
                 style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontFamily: "'Source Code Pro', monospace",
                   fontSize: '0.65rem',
                   color: 'var(--text-secondary)',
                   border: '1px solid var(--border)',

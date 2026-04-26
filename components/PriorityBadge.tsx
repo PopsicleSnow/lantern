@@ -10,7 +10,7 @@ export default function PriorityBadge({ priority, urgency }: PriorityBadgeProps)
   return (
     <span
       style={{
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "'Source Code Pro', monospace",
         fontSize: '0.7rem',
         letterSpacing: '0.1em',
         textTransform: 'uppercase',

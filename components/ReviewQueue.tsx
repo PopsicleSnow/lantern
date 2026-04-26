@@ -47,7 +47,7 @@ export default function ReviewQueue({ tips, onRoute, onClose }: ReviewQueueProps
     <div style={{ display: 'grid', gridTemplateColumns: selected ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {tips.length === 0 && (
-          <p style={{ color: 'var(--text-secondary)', fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.85rem' }}>
+          <p style={{ color: 'var(--text-secondary)', fontFamily: "'Source Code Pro', monospace", fontSize: '0.85rem' }}>
             No tips awaiting review.
           </p>
         )}
@@ -71,14 +71,14 @@ export default function ReviewQueue({ tips, onRoute, onClose }: ReviewQueueProps
             alignSelf: 'start',
           }}
         >
-          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.7rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>
+          <p style={{ fontFamily: "'Source Code Pro', monospace", fontSize: '0.7rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1rem' }}>
             TIP DETAIL
           </p>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', lineHeight: 1.7, marginBottom: '1.5rem', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {selected.content}
           </p>
 
-          <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.5rem', fontFamily: "'IBM Plex Mono', monospace" }}>
+          <label style={{ display: 'block', color: 'var(--text-secondary)', fontSize: '0.8rem', marginBottom: '0.5rem', fontFamily: "'Source Code Pro', monospace" }}>
             Route to journalist ID
           </label>
           <input
@@ -90,7 +90,7 @@ export default function ReviewQueue({ tips, onRoute, onClose }: ReviewQueueProps
               backgroundColor: 'var(--bg)',
               border: '1px solid var(--border)',
               color: 'var(--text-primary)',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'Source Code Pro', monospace",
               fontSize: '0.85rem',
               padding: '0.6rem 0.75rem',
               marginBottom: '1rem',
@@ -104,10 +104,10 @@ export default function ReviewQueue({ tips, onRoute, onClose }: ReviewQueueProps
               disabled={loading || !journalistId.trim()}
               style={{
                 backgroundColor: 'var(--accent)',
-                color: '#0a0a0a',
+                color: 'var(--bg)',
                 border: 'none',
                 padding: '0.6rem 1.25rem',
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 600,
                 fontSize: '0.85rem',
                 cursor: loading ? 'not-allowed' : 'pointer',
@@ -124,7 +124,7 @@ export default function ReviewQueue({ tips, onRoute, onClose }: ReviewQueueProps
                 border: '1px solid var(--warning)',
                 color: 'var(--warning)',
                 padding: '0.6rem 1.25rem',
-                fontFamily: "'IBM Plex Sans', sans-serif",
+                fontFamily: "'Source Sans 3', sans-serif",
                 fontWeight: 500,
                 fontSize: '0.85rem',
                 cursor: loading ? 'not-allowed' : 'pointer',
